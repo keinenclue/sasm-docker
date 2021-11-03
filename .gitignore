@@ -1,0 +1,6 @@
+.DS_Store
+
+# Don't upload config or smth
+sasm/*
+# But still leave the folder, for that we need a file
+!sasm/empty.md
