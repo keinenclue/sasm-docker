@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
          DEBIAN_FRONTEND=noninteractive  sudo apt-get update
-         DEBIAN_FRONTEND=noninteractive  sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libmesa-dev
+         DEBIAN_FRONTEND=noninteractive  sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev
          go get fyne.io/fyne/v2/cmd/fyne
          go install fyne.io/fyne/v2/cmd/fyne
 
