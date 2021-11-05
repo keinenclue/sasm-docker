@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         go-version: [1.17.x]
-        os: [ubuntu-18.04, macos-latest, windows-10]
+        os: [ubuntu-18.04]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
@@ -20,11 +20,11 @@ jobs:
         run: |
          go get fyne.io/fyne/v2/cmd/fyne
          go install fyne.io/fyne/v2/cmd/fyne
-         fyne install
+         $GOPATH/bin/fyne install
 
       - name: build
         run: |
-          fyne package --sourceDir launcher
+          $GOPATH/bin/fyne package --sourceDir launcher
 
       - name: Copy artifacts
         run: mkdir dist && cp ./launcher* dist
