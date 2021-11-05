@@ -30,8 +30,12 @@ jobs:
         shell: bash
         run: |
           cd launcher
-          go build -o out/launcher-${RUNNER_OS}
-
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            go build -o out/launcher-${RUNNER_OS}.exe
+          else
+            go build -o out/launcher-${RUNNER_OS}
+          fi
+          
       - name: Copy artifacts
         run: |
           ls ./*
