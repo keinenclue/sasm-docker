@@ -27,8 +27,9 @@ jobs:
          go install fyne.io/fyne/v2/cmd/fyne
 
       - name: build
+        shell: bash
         run: |
-          /home/runner/go/bin/fyne package --sourceDir launcher
+          $(go env GOPATH)/bin/fyne package --sourceDir launcher
 
       - name: Copy artifacts
         run: |
