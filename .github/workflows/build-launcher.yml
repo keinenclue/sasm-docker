@@ -29,15 +29,15 @@ jobs:
       - name: build
         shell: bash
         run: |
-          $(go env GOPATH)/bin/fyne package --sourceDir launcher
+          cd launcher
+          go build .
 
       - name: Copy artifacts
         run: |
-          tree
-          ls
+          go build -o launcher-${RUNNER_OS}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: launcher-${RUNNER_OS}
-          path: launcher.tar.xz
+          name: launcher
+          path: launcher-${{ env.RUNNER_OS }}
