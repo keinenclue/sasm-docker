@@ -30,11 +30,11 @@ jobs:
         shell: bash
         run: |
           cd launcher
-          go build .
+          go build -o launcher-${RUNNER_OS}
 
       - name: Copy artifacts
         run: |
-          go build -o launcher-${RUNNER_OS}
+          ls ./*
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
