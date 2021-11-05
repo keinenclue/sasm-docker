@@ -2,23 +2,19 @@ on:
   push:
   workflow_dispatch:
 
-name: Build Release
+name: Build Launcher
 
 jobs:
   build:
     name: build
     strategy:
-    matrix:
-      go-version: [1.16.x]
-      os: [ubuntu-18.04, macos-latest, windows-10]
+      matrix:
+        go-version: [1.17.x]
+        os: [ubuntu-18.04, macos-latest, windows-10]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - uses: actions/setup-go@v2
-        with:
-        go-version: '^1.17.2' # The Go version to download (if necessary) and use.
 
       - name: Install dependencies
         run: |
