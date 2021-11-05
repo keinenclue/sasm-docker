@@ -28,7 +28,9 @@ jobs:
           /home/runner/go/bin/fyne package --sourceDir launcher
 
       - name: Copy artifacts
-        run: mkdir dist && cp ./launcher* dist
+        run: |
+          tree
+          mkdir dist && cp -f ./launcher* dist
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
