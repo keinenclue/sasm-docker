@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         go-version: [1.17.x]
-        os: [ubuntu-18.04,windows-latest]
+        os: [ubuntu-18.04,windows-10,macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
