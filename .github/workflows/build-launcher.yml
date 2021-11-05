@@ -20,7 +20,6 @@ jobs:
         run: |
          go get fyne.io/fyne/v2/cmd/fyne
          go install fyne.io/fyne/v2/cmd/fyne
-         /home/runner/go/bin/fyne install
 
       - name: build
         run: |
