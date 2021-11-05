@@ -10,16 +10,19 @@ jobs:
     strategy:
       matrix:
         go-version: [1.17.x]
-        os: [ubuntu-18.04]
+        os: [ubuntu-18.04,windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Install dependencies
+        shell: bash
         run: |
-         DEBIAN_FRONTEND=noninteractive  sudo apt-get update
-         DEBIAN_FRONTEND=noninteractive  sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev
+         if [ "$RUNNER_OS" == "Linux" ]; then
+           DEBIAN_FRONTEND=noninteractive  sudo apt-get update
+           DEBIAN_FRONTEND=noninteractive  sudo apt-get install -y libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libgl1-mesa-dev
+         fi
          go get fyne.io/fyne/v2/cmd/fyne
          go install fyne.io/fyne/v2/cmd/fyne
 
@@ -34,5 +37,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: package
+          name: launcher-${RUNNER_OS}
           path: launcher.tar.xz
