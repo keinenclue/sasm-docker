@@ -20,11 +20,11 @@ jobs:
         run: |
          go get fyne.io/fyne/v2/cmd/fyne
          go install fyne.io/fyne/v2/cmd/fyne
-         $GOPATH/bin/fyne install
+         /home/runner/go/bin/fyne install
 
       - name: build
         run: |
-          $GOPATH/bin/fyne package --sourceDir launcher
+          /home/runner/go/bin/fyne package --sourceDir launcher
 
       - name: Copy artifacts
         run: mkdir dist && cp ./launcher* dist
