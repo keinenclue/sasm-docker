@@ -81,9 +81,13 @@ func handleContainerEvent(layerProgress map[string]*widget.ProgressBar, vBox *fy
 
 		case c.ContainerStateChanged:
 			state := event.Data.(c.ContainerState)
+
+			launchAppendLog("INFO", fmt.Sprintf("Container state is now: %d", state))
+
 			switch state {
 			case c.ContainerOfflineState:
-				statusLabel.SetText("")
+				endLogsSession()
+				statusLabel.SetText("Sasm exited")
 				startButton.Show()
 			default:
 				startButton.Hide()
@@ -94,8 +98,6 @@ func handleContainerEvent(layerProgress map[string]*widget.ProgressBar, vBox *fy
 				}
 				layerProgress = map[string]*widget.ProgressBar{}
 			}
-
-			launchAppendLog("INFO", fmt.Sprintf("Container state is now: %d", state))
 
 		case c.ConsoleOutput:
 			launchAppendLog("CONTAINER", event.Data.(string))
