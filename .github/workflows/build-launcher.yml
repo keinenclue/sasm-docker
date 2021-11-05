@@ -34,6 +34,7 @@ jobs:
       - name: Copy artifacts
         run: |
           tree
+          ls
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
