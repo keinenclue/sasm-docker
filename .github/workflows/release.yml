@@ -91,7 +91,7 @@ jobs:
         with:
           name: launcher
           
-      - uses: "justincy/github-action-npm-release@1.2.0"
+      - uses: "justincy/github-action-npm-release@2.0.2"
         id: create_release
         with:
            token: "${{ secrets.GITHUB_TOKEN }}"
