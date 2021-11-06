@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"github.com/keinenclue/sasm-docker/launcher/internal/autostart"
 	c "github.com/keinenclue/sasm-docker/launcher/internal/container"
 )
 
@@ -111,7 +112,9 @@ func launchImage(startButton *widget.Button, vBox *fyne.Container) func() {
 		newLogSession()
 		statusLabel.SetText("")
 
-		launchAppendLog("INFO", "Starting ...")
+		launchAppendLog("INFO", "Starting autostart programs if configured ...")
+		autostart.StartAll()
+
 		err, cont := c.NewSasmContainer()
 
 		if err != nil {
