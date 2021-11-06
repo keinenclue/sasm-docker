@@ -91,11 +91,10 @@ jobs:
         with:
           name: launcher
           
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - uses: "justincy/github-action-npm-release@v1.2.0"
         id: create_release
         with:
-           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-           prerelease: false
+           token: "${{ secrets.GITHUB_TOKEN }}"
            
       - name: Upload Release Assets
         id: upload-release-assets
@@ -103,5 +102,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          release_id: ${{ steps.create_release.outputs.automatic_releases_tag }}
+          release_id: ${{ steps.create_release.outputs.release_id }}
           assets_path: .
