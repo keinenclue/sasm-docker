@@ -17,7 +17,7 @@ func GetXserverExecPath() string {
 	return getExecPath(map[string]string{
 		"linux":   "Xorg",
 		"windows": "xlaunch.exe",
-		"darwin":  "xserver",
+		"darwin":  "XQuartz.app",
 	})
 }
 
