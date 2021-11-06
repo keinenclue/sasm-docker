@@ -2,8 +2,7 @@ name: "Build release"
 
 on:
   push:
-    tags:
-      - "v*"
+  workflow_dispatch:
 
 jobs:
   build-launcher:
