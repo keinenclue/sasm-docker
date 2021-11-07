@@ -1,31 +1,31 @@
-FROM alpine:latest as base
+FROM i386/alpine as base
 
 # We don't need other stuff
 # RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf && \
 #     echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf
+    # RUN echo "CONFIG += static \n QTPLUGIN += qsqloci qgif" >> /home/SASM-master/SASM.pro
 RUN apk update && \
-    apk add nasm gcc gdb fontconfig
-RUN rm /var/cache/apk/*
+    apk add nasm gcc gdb fontconfig && \
+    rm /var/cache/apk/*
 
 FROM base as build
 
-RUN apk add g++ make qt5-qtbase-dev unzip curl \
-    msttcorefonts-installer
-
-# Setup fonts
-RUN update-ms-fonts
-RUN fc-cache -f
-
-# Install sasm
-RUN curl -L -o sasm.zip https://github.com/Dman95/SASM/archive/refs/heads/master.zip
-RUN unzip sasm.zip -d /home
-# RUN echo "CONFIG += static \n QTPLUGIN += qsqloci qgif" >> /home/SASM-master/SASM.pro
-
-RUN cd /home/SASM-master && qmake-qt5 && make && make install
-RUN mv /home/SASM-master/sasm /home/SASM-master/Linux/sasm
+RUN apk update && \
+    apk add nasm gcc gdb fontconfig g++ make qt5-qtbase-dev unzip curl musl-dev \
+    msttcorefonts-installer && \
+    echo "#### Setup fonts ####" && \
+    update-ms-fonts && \
+    fc-cache -f && \
+    echo "#### Install sasm ####" && \
+    curl -L -o sasm.zip https://github.com/Dman95/SASM/archive/refs/heads/master.zip && \
+    unzip sasm.zip -d /home && rm sasm.zip && \
+    cd /home/SASM-master && qmake-qt5 && make && make install && \
+    mv /home/SASM-master/sasm /home/SASM-master/Linux/sasm && \
+    rm /var/cache/apk/*
 # RUN mv /home/SASM-master/Linux /home
 # Clean stuff up
-RUN rm /var/cache/apk/*
+
+CMD ["/usr/bin/sasm"]
 
 # FROM base as runtime    
 
