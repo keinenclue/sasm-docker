@@ -31,14 +31,14 @@ jobs:
           run: |
             cd launcher
             if [ "$RUNNER_OS" == "Windows" ]; then
-              go build -o out/launcher-${RUNNER_OS}.exe
+              go build -x -o out/launcher-${RUNNER_OS}.exe
             elif [ "$RUNNER_OS" == "macOS" ]; then
-              go build -o out/launcher-macOS.app
+              go build -x -o out/launcher-macOS.app
               chmod +x ./out/launcher-macOS.app
               hdiutil create ./out/launcher-macOS.dmg -srcfolder "./out"
               rm ./out/launcher-macOS.app
             else
-              go build -o out/launcher-${RUNNER_OS}
+              go build -x -o out/launcher-${RUNNER_OS}
               chmod +x ./out/launcher-${RUNNER_OS}
             fi
 
