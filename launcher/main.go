@@ -14,7 +14,7 @@ func main() {
 	config.Setup(u.HomeDir + "/sasm-data")
 	a := app.New()
 	w := a.NewWindow("Sasm-docker launcher")
-	w.Resize(fyne.NewSize(700, 600))
+	w.Resize(fyne.NewSize(500, 300))
 	w.SetContent(gui.New(w))
 
 	w.ShowAndRun()

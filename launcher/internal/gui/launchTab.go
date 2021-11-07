@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"github.com/keinenclue/sasm-docker/launcher/internal/autostart"
 	c "github.com/keinenclue/sasm-docker/launcher/internal/container"
@@ -27,6 +28,7 @@ Once you have them installed, just click Launch :D`)
 
 	vBox := container.NewVBox(
 		hello,
+		layout.NewSpacer(),
 		statusLabel,
 		startButton,
 	)
