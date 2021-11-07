@@ -33,7 +33,7 @@ jobs:
           run: |
             cd launcher
             if [ "$RUNNER_OS" == "Windows" ]; then
-              $(go env GOPATH)/bin/fyne package -os darwin -icon Icon.png
+              $(go env GOPATH)/bin/fyne package -os windows -icon Icon.png
               mkdir out
               mv launcher.exe out/launcher-Windows.exe
             elif [ "$RUNNER_OS" == "macOS" ]; then
