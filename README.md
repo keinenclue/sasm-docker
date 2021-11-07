@@ -13,7 +13,7 @@
         <img src="https://github.com/keinenclue/sasm-docker/actions/workflows/release.yml/badge.svg" alt="Badge tests">
     </a>
     <a href="https://goreportcard.com/report/github.com/keinenclue/sasm-docker">
-        <img src="https://img.shields.io/badge/go%20report-A-green.svg?style=flat" alt="Go report" />
+        <img src="https://goreportcard.com/badge/github.com/keinenclue/sasm-docker" alt="Go report" />
     </a>
 </p>
 
