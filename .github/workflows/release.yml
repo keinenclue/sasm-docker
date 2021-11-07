@@ -33,9 +33,15 @@ jobs:
             if [ "$RUNNER_OS" == "Windows" ]; then
               go build -o out/launcher-${RUNNER_OS}.exe
             elif [ "$RUNNER_OS" == "macOS" ]; then
-              go build -o out/launcher-${RUNNER_OS}.app
+              go build -o out/launcher-macOS.app
+              chmod +x ./out/launcher-macOS.app
+              hdiutil create /out/tmp.dmg -ov -volname "launcher-macOS" -fs HFS+ -srcfolder "./out"
+              hdiutil convert /out/tmp.dmg -format UDZO -o launcher-macOS.dmg
+              rm ./out/launcher-macOS.app
+              rm ./out/tmp.dmg
             else
               go build -o out/launcher-${RUNNER_OS}
+              chmod +x ./out/launcher-${RUNNER_OS}
             fi
 
         - name: Copy artifacts
