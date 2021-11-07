@@ -31,6 +31,9 @@ func NewSasmContainer() (*LaunchableContainer, error) {
 		if runtime.GOOS == "darwin" {
 			c := exec.Command("xhost", "+localhost")
 			c.Run()
+		} else if runtime.GOOS == "linux" {
+			c := exec.Command("xhost", "SI:localuser:root")
+			c.Run()
 		}
 	})
 }
