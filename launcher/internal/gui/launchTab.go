@@ -42,27 +42,27 @@ func launchAppendLog(level string, message string) {
 	appendLog(level, message)
 }
 
-func handleContainerEvent(layerProgress map[string]*widget.ProgressBar, vBox *fyne.Container, startButton *widget.Button) func(event c.ContainerEvent) {
-	return func(event c.ContainerEvent) {
+func handleContainerEvent(layerProgress map[string]*widget.ProgressBar, vBox *fyne.Container, startButton *widget.Button) func(event c.Event) {
+	return func(event c.Event) {
 		switch event.Type {
 		case c.ImagePullStatusChanged:
 			s := event.Data.(c.ImagePullStatus)
 			//fmt.Println(s)
-			if s.Id == "" || s.ProgressDetail == nil {
+			if s.ID == "" || s.ProgressDetail == nil {
 				launchAppendLog("INFO", s.Status)
 				return
 			}
 
-			if layerProgress[s.Id] == nil {
+			if layerProgress[s.ID] == nil {
 				pb := widget.NewProgressBar()
-				layerProgress[s.Id] = pb
+				layerProgress[s.ID] = pb
 				pb.SetValue(0)
 				vBox.AddObject(pb)
 				vBox.Refresh()
 			}
 			//fmt.Printf("%s %s", s.Status, s.Progress)
 			//
-			pb := layerProgress[s.Id]
+			pb := layerProgress[s.ID]
 			currentMB := float64(s.ProgressDetail.Current) / 1000000
 			totalMB := float64(s.ProgressDetail.Total) / 1000000
 			value := currentMB / totalMB
@@ -72,28 +72,27 @@ func handleContainerEvent(layerProgress map[string]*widget.ProgressBar, vBox *fy
 			pb.SetValue(value)
 			pb.TextFormatter = func() string {
 				if value == 1 {
-					return fmt.Sprintf("%s: %s", s.Id, s.Status)
-				} else {
-					return fmt.Sprintf("%s: %s (%.2fMB/%.2fMB)", s.Id, s.Status, currentMB, totalMB)
+					return fmt.Sprintf("%s: %s", s.ID, s.Status)
 				}
+				return fmt.Sprintf("%s: %s (%.2fMB/%.2fMB)", s.ID, s.Status, currentMB, totalMB)
 			}
 
 			pb.Refresh()
 
-		case c.ContainerStateChanged:
-			state := event.Data.(c.ContainerState)
+		case c.StateChanged:
+			state := event.Data.(c.State)
 
 			launchAppendLog("INFO", fmt.Sprintf("Container state is now: %d", state))
 
 			switch state {
-			case c.ContainerOfflineState:
+			case c.OfflineState:
 				endLogsSession()
 				statusLabel.SetText("Sasm exited")
 				startButton.Show()
 			default:
 				startButton.Hide()
 			}
-			if state != c.ContainerPullingState && len(layerProgress) > 0 {
+			if state != c.PullingState && len(layerProgress) > 0 {
 				for _, bar := range layerProgress {
 					vBox.Remove(bar)
 				}
@@ -115,7 +114,7 @@ func launchImage(startButton *widget.Button, vBox *fyne.Container) func() {
 		launchAppendLog("INFO", "Starting autostart programs if configured ...")
 		autostart.StartAll()
 
-		err, cont := c.NewSasmContainer()
+		cont, err := c.NewSasmContainer()
 
 		if err != nil {
 			launchAppendLog("ERROR", err.Error())

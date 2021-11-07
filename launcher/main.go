@@ -15,7 +15,7 @@ func main() {
 	a := app.New()
 	w := a.NewWindow("Sasm-docker launcher")
 	w.Resize(fyne.NewSize(700, 600))
-	w.SetContent(gui.NewGui(w))
+	w.SetContent(gui.New(w))
 
 	w.ShowAndRun()
 }

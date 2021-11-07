@@ -71,8 +71,7 @@ func newPathConfig(configKey string, label string, w fyne.Window, container *fyn
 }
 
 func newSwitchConfig(configKey string, label string, container *fyne.Container) {
-	var checkWidget *widget.Check = nil
-	checkWidget = widget.NewCheck("", func(b bool) {
+	checkWidget := widget.NewCheck("", func(b bool) {
 		config.Set(configKey, b)
 	})
 	checkWidget.SetChecked(config.Get(configKey).(bool))

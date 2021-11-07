@@ -9,7 +9,8 @@ import (
 
 const image string = "ghcr.io/keinenclue/sasm-docker"
 
-func NewSasmContainer() (error, *LaunchableContainer) {
+// NewSasmContainer creates a new launchable sasm container
+func NewSasmContainer() (*LaunchableContainer, error) {
 	containerEnv := []string{}
 	containerBinds := []string{}
 

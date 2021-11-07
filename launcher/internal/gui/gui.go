@@ -9,7 +9,8 @@ import (
 var currentTabIndex = 0
 var tabs *container.AppTabs = nil
 
-func NewGui(w fyne.Window) fyne.CanvasObject {
+// New creates the gui
+func New(w fyne.Window) fyne.CanvasObject {
 	c.New()
 
 	tabs = container.NewAppTabs(

@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -16,23 +15,27 @@ import (
 	"github.com/pterodactyl/wings/system"
 )
 
+// ImagePullProgressDetails contains details of an ongoing pull
 type ImagePullProgressDetails struct {
 	Current int `json:"current"`
 	Total   int `json:"total"`
 }
 
+// ImagePullStatus contains the status of an ongoing pull
 type ImagePullStatus struct {
-	Id             string                    `json:"id"`
+	ID             string                    `json:"id"`
 	Status         string                    `json:"status"`
 	Progress       string                    `json:"progress"`
 	ProgressDetail *ImagePullProgressDetails `json:"progressDetail"`
 }
 
-type ContainerEvent struct {
-	Type ContainerEventType
+// Event contains a container event
+type Event struct {
+	Type EventType
 	Data interface{}
 }
 
+// LaunchableContainer is a container which can be launched by this launcher
 type LaunchableContainer struct {
 	onContainerEventFuncs []OnContainerEventFuc
 	image                 string
@@ -40,31 +43,42 @@ type LaunchableContainer struct {
 	containerName         string
 	containerEnv          []string
 	containerBinds        []string
-	state                 ContainerState
+	state                 State
 	stream                *types.HijackedResponse
 	// Tracks the environment state.
 	st *system.AtomicString
 }
 
-type ContainerState int
+// State is the state of a container
+type State int
 
 const (
-	ContainerOfflineState ContainerState = iota
-	ContainerPullingState
-	ContainerStartingState
-	ContainerRunningState
-	ContainerStoppingState
+	// OfflineState means the container is offline
+	OfflineState State = iota
+	// PullingState means the container image is being pulled
+	PullingState
+	// StartingState means the container is starting
+	StartingState
+	// RunningState means the container is running
+	RunningState
+	// StoppingState means the container is stopping
+	StoppingState
 )
 
-type ContainerEventType int
+// EventType is the type of a container event
+type EventType int
 
 const (
-	ImagePullStatusChanged ContainerEventType = iota
-	ContainerStateChanged
+	// ImagePullStatusChanged means that the pull status or progress changed
+	ImagePullStatusChanged EventType = iota
+	// StateChanged means that the ContainerState changed
+	StateChanged
+	// ConsoleOutput means that there was some console output by the container
 	ConsoleOutput
 )
 
-type OnContainerEventFuc func(event ContainerEvent)
+// OnContainerEventFuc is the type of a callback function which gets called on every container event
+type OnContainerEventFuc func(event Event)
 
 // A custom console writer that allows us to keep a function blocked until the
 // given stream is properly closed. This does nothing special, only exists to
@@ -73,7 +87,7 @@ type noopWriter struct{}
 
 var _ io.Writer = noopWriter{}
 
-// Implement the required Write function to satisfy the io.Writer interface.
+// Write implements the required Write function to satisfy the io.Writer interface.
 func (nw noopWriter) Write(b []byte) (int, error) {
 	return len(b), nil
 }
@@ -81,6 +95,7 @@ func (nw noopWriter) Write(b []byte) (int, error) {
 var ctx = context.Background()
 var dockerClient *client.Client = nil
 
+// New initializes the container module
 func New() error {
 	var err error
 	dockerClient, err = client.NewClientWithOpts(client.FromEnv)
@@ -92,26 +107,29 @@ func New() error {
 	return nil
 }
 
+// IsConnectedToDocker returns if we are connected to the docker daemon
 func IsConnectedToDocker() bool {
 	return dockerClient != nil
 }
 
+// OnContainerEvent allows to register a callback function
 func (c *LaunchableContainer) OnContainerEvent(callback OnContainerEventFuc) {
 	c.onContainerEventFuncs = append(c.onContainerEventFuncs, callback)
 }
 
-func newContainer(image string, containerId string, containerEnv []string, containerBinds []string) (error, *LaunchableContainer) {
+func newContainer(image string, containerID string, containerEnv []string, containerBinds []string) (*LaunchableContainer, error) {
 
 	c := LaunchableContainer{
 		image:          image,
-		containerName:  containerId,
+		containerName:  containerID,
 		containerEnv:   containerEnv,
 		containerBinds: containerBinds,
 	}
 
-	return nil, &c
+	return &c, nil
 }
 
+// Launch launches the container
 func (c *LaunchableContainer) Launch() error {
 
 	if err := c.Stop(); err != nil {
@@ -137,27 +155,30 @@ func (c *LaunchableContainer) Launch() error {
 	return nil
 }
 
+// Stop stops the container
 func (c *LaunchableContainer) Stop() error {
 	if err := dockerClient.ContainerStop(ctx, c.containerName, nil); err != nil && !client.IsErrNotFound(err) {
 		log.L.Error("Could not stop old container: " + err.Error())
 		return err
 	}
-	c.setState(ContainerOfflineState)
+	c.setState(OfflineState)
 	return nil
 }
 
+// Remove removes the conatiner
 func (c *LaunchableContainer) Remove() error {
 	if err := dockerClient.ContainerRemove(ctx, c.containerName, types.ContainerRemoveOptions{Force: true}); err != nil && !client.IsErrNotFound(err) {
 		log.L.Error("Could not remove old container: " + err.Error())
 		return err
 	}
-	c.setState(ContainerOfflineState)
+	c.setState(OfflineState)
 	return nil
 }
 
+// Pull pulls the container
 func (c *LaunchableContainer) Pull() error {
-	c.setState(ContainerPullingState)
-	defer c.setState(ContainerOfflineState)
+	c.setState(PullingState)
+	defer c.setState(OfflineState)
 
 	reader, err := dockerClient.ImagePull(ctx, image, types.ImagePullOptions{})
 	if err != nil {
@@ -170,7 +191,7 @@ func (c *LaunchableContainer) Pull() error {
 
 		//fmt.Println(scanner.Text())
 		if err := json.Unmarshal(scanner.Bytes(), &s); err == nil {
-			c.handleContainerEvent(ContainerEvent{
+			c.handleContainerEvent(Event{
 				Type: ImagePullStatusChanged,
 				Data: s,
 			})
@@ -179,8 +200,9 @@ func (c *LaunchableContainer) Pull() error {
 	return nil
 }
 
+// Start starts the container
 func (c *LaunchableContainer) Start() error {
-	c.setState(ContainerStartingState)
+	c.setState(StartingState)
 	cont, err := dockerClient.ContainerCreate(
 		ctx,
 		&container.Config{
@@ -192,7 +214,7 @@ func (c *LaunchableContainer) Start() error {
 		}, nil, nil, c.containerName)
 
 	if err != nil {
-		c.setState(ContainerOfflineState)
+		c.setState(OfflineState)
 		return err
 	}
 
@@ -200,14 +222,15 @@ func (c *LaunchableContainer) Start() error {
 
 	err = dockerClient.ContainerStart(ctx, cont.ID, types.ContainerStartOptions{})
 	if err != nil {
-		c.setState(ContainerOfflineState)
+		c.setState(OfflineState)
 		return err
 	}
 
-	c.setState(ContainerRunningState)
+	c.setState(RunningState)
 	return nil
 }
 
+// Attach attaches the log listener to the container
 func (c *LaunchableContainer) Attach() error {
 
 	if err := c.followOutput(); err != nil {
@@ -222,16 +245,16 @@ func (c *LaunchableContainer) Attach() error {
 	}
 
 	// Set the stream again with the container.
-	if st, err := dockerClient.ContainerAttach(ctx, c.containerBody.ID, opts); err != nil {
+	st, err := dockerClient.ContainerAttach(ctx, c.containerBody.ID, opts)
+	if err != nil {
 		return err
-	} else {
-		c.stream = &st
 	}
+	c.stream = &st
 
 	go func() {
 		defer c.stream.Close()
 		defer func() {
-			c.setState(ContainerOfflineState)
+			c.setState(OfflineState)
 			c.Remove()
 			c.stream = nil
 		}()
@@ -279,7 +302,7 @@ func (c *LaunchableContainer) scanOutput(reader io.ReadCloser) {
 	defer reader.Close()
 
 	if err := system.ScanReader(reader, func(line string) {
-		c.handleContainerEvent(ContainerEvent{
+		c.handleContainerEvent(Event{
 			Type: ConsoleOutput,
 			Data: line,
 		})
@@ -288,7 +311,7 @@ func (c *LaunchableContainer) scanOutput(reader io.ReadCloser) {
 		return
 	}
 
-	if c.state == ContainerStoppingState || c.state == ContainerOfflineState {
+	if c.state == StoppingState || c.state == OfflineState {
 		return
 	}
 
@@ -297,23 +320,23 @@ func (c *LaunchableContainer) scanOutput(reader io.ReadCloser) {
 	go c.followOutput()
 }
 
-func (c *LaunchableContainer) handleContainerEvent(e ContainerEvent) {
+func (c *LaunchableContainer) handleContainerEvent(e Event) {
 	for _, callbackFunc := range c.onContainerEventFuncs {
 		callbackFunc(e)
 	}
 }
 
-func (c *LaunchableContainer) setState(s ContainerState) {
-	if s < ContainerOfflineState || s > ContainerStoppingState {
-		panic(errors.New(fmt.Sprintf("invalid container state received: %d", s)))
+func (c *LaunchableContainer) setState(s State) {
+	if s < OfflineState || s > StoppingState {
+		panic(fmt.Errorf("invalid container state received: %d", s))
 	}
 
 	// Emit the event to any listeners that are currently registered.
 	if c.state != s {
 		// If the state changed make sure we update the internal tracking to note that.
 		c.state = s
-		c.handleContainerEvent(ContainerEvent{
-			Type: ContainerStateChanged,
+		c.handleContainerEvent(Event{
+			Type: StateChanged,
 			Data: s,
 		})
 	}

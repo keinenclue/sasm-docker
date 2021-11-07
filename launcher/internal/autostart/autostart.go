@@ -7,6 +7,7 @@ import (
 	"github.com/keinenclue/sasm-docker/launcher/internal/config"
 )
 
+// StartAll executes all configured autostarts
 func StartAll() {
 	programs := []string{"docker", "xserver"}
 	for _, program := range programs {

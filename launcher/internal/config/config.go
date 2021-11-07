@@ -47,7 +47,7 @@ func SetupWithName(configPath string, configName string) error {
 	return nil
 }
 
-// GetConfig returns the config
+// Get returns a config value
 func Get(key string) interface{} {
 	return viper.Get(key)
 }
@@ -57,6 +57,7 @@ func PathUsed() string {
 	return path.Dir(viper.ConfigFileUsed())
 }
 
+// Set modifies a config value
 func Set(key string, value interface{}) {
 	viper.Set(key, value)
 	viper.WriteConfig()

@@ -21,7 +21,7 @@ func newLogTab(w fyne.Window) fyne.CanvasObject {
 		clipboard.Write(clipboard.FmtText, []byte(logContent.Text()))
 	})
 	reportIssueButton := widget.NewButton("Report issue", func() {
-		openUrl("https://github.com/keinenclue/sasm-docker/issues/new")
+		openURL("https://github.com/keinenclue/sasm-docker/issues/new")
 	})
 	logContent = widget.NewTextGridFromString("No logs so far.")
 	scroll := container.NewScroll(logContent)
@@ -77,8 +77,8 @@ func appendLog(level string, message string) {
 	logContent.SetText(logContent.Text() + "")
 }
 
-// open opens the specified URL in the default browser of the user.
-func openUrl(url string) error {
+// openURL opens the specified URL in the default browser of the user.
+func openURL(url string) error {
 	var cmd string
 	var args []string
 

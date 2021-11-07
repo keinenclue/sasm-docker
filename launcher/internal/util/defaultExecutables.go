@@ -5,6 +5,7 @@ import (
 	"runtime"
 )
 
+// GetDockerExecPath returns the default path oft the docker executable
 func GetDockerExecPath() string {
 	return getExecPath(map[string]string{
 		"linux":   "docker",
@@ -13,6 +14,7 @@ func GetDockerExecPath() string {
 	})
 }
 
+// GetXserverExecPath returns the default path oft the xserver executable
 func GetXserverExecPath() string {
 	return getExecPath(map[string]string{
 		"linux":   "Xorg",
