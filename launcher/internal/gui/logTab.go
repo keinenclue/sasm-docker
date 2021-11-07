@@ -14,6 +14,7 @@ import (
 )
 
 var logContent *widget.TextGrid = nil
+var logSessionRunning = false
 var noLogs = true
 
 func newLogTab(w fyne.Window) fyne.CanvasObject {
@@ -39,14 +40,20 @@ func newLogTab(w fyne.Window) fyne.CanvasObject {
 }
 
 func newLogSession() {
+	logSessionRunning = true
 	appendLog("", "---- start ----\n")
 }
 
 func endLogsSession() {
 	appendLog("", "\n---- end ----\n")
+	logSessionRunning = false
 }
 
 func appendLog(level string, message string) {
+	if !logSessionRunning {
+		return
+	}
+
 	if noLogs {
 		logContent.SetText("")
 		noLogs = false

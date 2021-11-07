@@ -84,7 +84,7 @@ func handleContainerEvent(layerProgress map[string]*widget.ProgressBar, vBox *fy
 		case c.StateChanged:
 			state := event.Data.(c.State)
 
-			launchAppendLog("INFO", fmt.Sprintf("Container state is now: %d", state))
+			launchAppendLog("INFO", fmt.Sprintf("Container state is now: %s", event.Self.StateString()))
 
 			switch state {
 			case c.OfflineState:

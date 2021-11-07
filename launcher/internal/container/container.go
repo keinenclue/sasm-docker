@@ -32,6 +32,7 @@ type ImagePullStatus struct {
 // Event contains a container event
 type Event struct {
 	Type EventType
+	Self *LaunchableContainer
 	Data interface{}
 }
 
@@ -45,6 +46,7 @@ type LaunchableContainer struct {
 	containerEnv          []string
 	containerBinds        []string
 	state                 State
+	isLaunching           bool
 	stream                *types.HijackedResponse
 	// Tracks the environment state.
 	st *system.AtomicString
@@ -56,6 +58,8 @@ type State int
 const (
 	// OfflineState means the container is offline
 	OfflineState State = iota
+	// LaunchingState is the state in between offline and pulling and pulling an starting state
+	LaunchingState
 	// PullingState means the container image is being pulled
 	PullingState
 	// StartingState means the container is starting
@@ -65,6 +69,15 @@ const (
 	// StoppingState means the container is stopping
 	StoppingState
 )
+
+var stateNames = map[State]string{
+	OfflineState:   "offline",
+	LaunchingState: "launching",
+	PullingState:   "pulling",
+	StartingState:  "starting",
+	RunningState:   "running",
+	StoppingState:  "stopping",
+}
 
 // EventType is the type of a container event
 type EventType int
@@ -128,6 +141,7 @@ func newContainer(image string, containerID string, containerEnv []string, conta
 		containerName:  containerID,
 		containerEnv:   containerEnv,
 		containerBinds: containerBinds,
+		isLaunching:    false,
 	}
 
 	return &c, nil
@@ -135,6 +149,12 @@ func newContainer(image string, containerID string, containerEnv []string, conta
 
 // Launch launches the container
 func (c *LaunchableContainer) Launch() error {
+
+	c.setState(LaunchingState)
+	c.isLaunching = true
+	defer func() {
+		c.isLaunching = false
+	}()
 
 	if err := c.Stop(); err != nil {
 		return err
@@ -161,6 +181,7 @@ func (c *LaunchableContainer) Launch() error {
 
 // Stop stops the container
 func (c *LaunchableContainer) Stop() error {
+	c.setState(StoppingState)
 	if err := dockerClient.ContainerStop(ctx, c.containerName, nil); err != nil && !client.IsErrNotFound(err) {
 		log.L.Error("Could not stop old container: " + err.Error())
 		return err
@@ -330,6 +351,7 @@ func (c *LaunchableContainer) scanOutput(reader io.ReadCloser) {
 }
 
 func (c *LaunchableContainer) handleContainerEvent(e Event) {
+	e.Self = c
 	for _, callbackFunc := range c.onContainerEventFuncs {
 		callbackFunc(e)
 	}
@@ -339,18 +361,24 @@ func (c *LaunchableContainer) setState(s State) {
 	if s < OfflineState || s > StoppingState {
 		panic(fmt.Errorf("invalid container state received: %d", s))
 	}
+	if s == OfflineState && c.isLaunching {
+		s = LaunchingState
+	}
 
-	// Emit the event to any listeners that are currently registered.
 	if c.state != s {
-		// If the state changed make sure we update the internal tracking to note that.
 		c.state = s
 		c.handleContainerEvent(Event{
 			Type: StateChanged,
-			Data: s,
+			Data: c.state,
 		})
 	}
 }
 
 func (c *LaunchableContainer) log(l string, m string) {
 	log.L.Info(m)
+}
+
+// StateString returns the current container state as a string
+func (c *LaunchableContainer) StateString() string {
+	return stateNames[c.state]
 }
