@@ -52,6 +52,7 @@ jobs:
                 --app-drop-link 600 185 \
                 "SASM Launcher.dmg" \
                 "out/"
+              mv SASM\ Launcher.dmg out/SASM\ launcher.dmg
               rm -r ./out/SASM\ launcher.app
             else
               go build -x -o out/launcher-${RUNNER_OS}
