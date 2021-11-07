@@ -55,9 +55,10 @@ You just need to have X server on your system in the end.
 - Download the binary for your OS over here: [https://github.com/keinenclue/sasm-docker/releases/latest](https://github.com/keinenclue/sasm-docker/releases/latest)
 - On MacOS open the dmg and drag the application to you applications folder
 
-#### Issues
+#### Known issues
 
 - If you get the warning `warning: creating DT_TEXTREL in a PIE` add the flag `-fPIC` to `Linking options`
+- Debugging of a project which uses multiple files will not work ([this is a bug in sasm](https://github.com/Dman95/SASM/issues/102))
 - If the debugging doesn't work, clear your Data path(it's best that you completly delete the folder and then recreate it and put your files back in)
 
 ## Screenshots
