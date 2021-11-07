@@ -1,113 +1,43 @@
 FROM i386/alpine as base
 
 RUN apk update && \
-    apk add nasm gcc gdb fontconfig g++ make qt5-qtbase-dev unzip curl musl-dev \
+    apk add nasm gcc gdb fontconfig musl-dev
+
+RUN rm /var/cache/apk/*
+
+FROM base as build
+
+RUN apk add build-base qt5-qtbase-dev unzip curl \
     msttcorefonts-installer && \
-    echo "#### Setup fonts ####" && \
     update-ms-fonts && \
     fc-cache -f && \
-    echo "#### Install sasm ####" && \
     curl -L -o sasm.zip https://github.com/Dman95/SASM/archive/refs/heads/master.zip && \
-    unzip sasm.zip -d /home && rm sasm.zip && \
-    cd /home/SASM-master && qmake-qt5 && make && make install && \
-    echo "#### Cleanup ####" && \
-    rm -rf /home && \
-    rm /var/cache/apk/*
+    unzip sasm.zip -d /home && \
+    cd /home/SASM-master && qmake-qt5 && make && make install
 
-CMD ["/usr/bin/sasm"]
 
-# FROM base as runtime    
+# Source: https://gist.github.com/bcardiff/85ae47e66ff0df35a78697508fcb49af#gistcomment-2078660 
+RUN ldd /usr/bin/sasm | tr -s '[:blank:]' '\n' | grep '^/' | \
+    xargs -I % sh -c 'mkdir -p $(dirname /home/deps%); cp % /home/deps%;'
 
-# # Copy fonts
-# COPY --from=build /usr/share/fonts/truetype/msttcorefonts/Courier* /usr/share/fonts/truetype/msttcorefonts/
-# COPY --from=build /usr/share/fonts/truetype/msttcorefonts/cour* /usr/share/fonts/truetype/msttcorefonts/
-# COPY --from=build /usr/share/fonts/truetype/msttcorefonts/Arial* /usr/share/fonts/truetype/msttcorefonts/
-# COPY --from=build /usr/share/fonts/truetype/msttcorefonts/arial* /usr/share/fonts/truetype/msttcorefonts/
-# RUN fc-cache -f -v
+RUN ldd /usr/lib/qt5/plugins/platforms/libqxcb.so | tr -s '[:blank:]' '\n' | grep '^/' | \
+    xargs -I % sh -c 'mkdir -p $(dirname /home/deps%); cp % /home/deps%;'
 
-# # Copy sasm
-# COPY --from=build /home/SASM-master/Linux /home/sasm
+FROM base as runtime    
 
-# # Copy dependencies
-# # Find them out by running ldd /home/sasm/sasm > and ldd /usr/lib/libQt5XcbQpa.so.5
-# # ldd /home/sasm/sasm > dep
-# # ldd /usr/lib/libQt5XcbQpa.so.5 >> dep
-# # Then remove duplicates
-# # awk '!seen[$0]++' dep
-# # 
-# # Now use regex to remove the beginning and end
-# # Using multiline selections 
-# # add COPY --from=build in the front and duplicate the paths
+# Copy fonts
+COPY --from=build /usr/share/fonts/truetype/msttcorefonts/Courier* /usr/share/fonts/truetype/msttcorefonts/
+COPY --from=build /usr/share/fonts/truetype/msttcorefonts/cour* /usr/share/fonts/truetype/msttcorefonts/
+COPY --from=build /usr/share/fonts/truetype/msttcorefonts/Arial* /usr/share/fonts/truetype/msttcorefonts/
+COPY --from=build /usr/share/fonts/truetype/msttcorefonts/arial* /usr/share/fonts/truetype/msttcorefonts/
+RUN fc-cache -f -v
 
-# COPY --from=build /usr/lib/qt5 /usr/lib/qt5
-# COPY --from=build /usr/lib/libQt5XcbQpa.so.5 /usr/lib/libQt5XcbQpa.so.5
-# COPY --from=build /lib/ld-musl-x86_64.so.1 /lib/ld-musl-x86_64.so.1 
-# COPY --from=build /usr/lib/libfontconfig.so.1 /usr/lib/libfontconfig.so.1 
-# COPY --from=build /usr/lib/libfreetype.so.6 /usr/lib/libfreetype.so.6 
-# COPY --from=build /usr/lib/libQt5Gui.so.5 /usr/lib/libQt5Gui.so.5 
-# COPY --from=build /usr/lib/libQt5DBus.so.5 /usr/lib/libQt5DBus.so.5 
-# COPY --from=build /usr/lib/libQt5Core.so.5 /usr/lib/libQt5Core.so.5 
-# COPY --from=build /usr/lib/libX11-xcb.so.1 /usr/lib/libX11-xcb.so.1 
-# COPY --from=build /usr/lib/libxcb-icccm.so.4 /usr/lib/libxcb-icccm.so.4 
-# COPY --from=build /usr/lib/libxcb-image.so.0 /usr/lib/libxcb-image.so.0 
-# COPY --from=build /usr/lib/libxcb-shm.so.0 /usr/lib/libxcb-shm.so.0 
-# COPY --from=build /usr/lib/libxcb-keysyms.so.1 /usr/lib/libxcb-keysyms.so.1 
-# COPY --from=build /usr/lib/libxcb-randr.so.0 /usr/lib/libxcb-randr.so.0 
-# COPY --from=build /usr/lib/libxcb-render-util.so.0 /usr/lib/libxcb-render-util.so.0 
-# COPY --from=build /usr/lib/libxcb-render.so.0 /usr/lib/libxcb-render.so.0 
-# COPY --from=build /usr/lib/libxcb-shape.so.0 /usr/lib/libxcb-shape.so.0 
-# COPY --from=build /usr/lib/libxcb-sync.so.1 /usr/lib/libxcb-sync.so.1 
-# COPY --from=build /usr/lib/libxcb-xfixes.so.0 /usr/lib/libxcb-xfixes.so.0 
-# COPY --from=build /usr/lib/libxcb-xinerama.so.0 /usr/lib/libxcb-xinerama.so.0 
-# COPY --from=build /usr/lib/libxcb-xkb.so.1 /usr/lib/libxcb-xkb.so.1 
-# COPY --from=build /usr/lib/libxcb-xinput.so.0 /usr/lib/libxcb-xinput.so.0 
-# COPY --from=build /usr/lib/libxcb.so.1 /usr/lib/libxcb.so.1 
-# COPY --from=build /usr/lib/libX11.so.6 /usr/lib/libX11.so.6 
-# COPY --from=build /usr/lib/libSM.so.6 /usr/lib/libSM.so.6 
-# COPY --from=build /usr/lib/libICE.so.6 /usr/lib/libICE.so.6 
-# COPY --from=build /usr/lib/libxkbcommon-x11.so.0 /usr/lib/libxkbcommon-x11.so.0 
-# COPY --from=build /usr/lib/libxkbcommon.so.0 /usr/lib/libxkbcommon.so.0 
-# COPY --from=build /usr/lib/libglib-2.0.so.0 /usr/lib/libglib-2.0.so.0 
-# COPY --from=build /usr/lib/libstdc++.so.6 /usr/lib/libstdc++.so.6 
-# COPY --from=build /usr/lib/libgcc_s.so.1 /usr/lib/libgcc_s.so.1 
-# COPY --from=build /usr/lib/libexpat.so.1 /usr/lib/libexpat.so.1 
-# COPY --from=build /lib/libuuid.so.1 /lib/libuuid.so.1 
-# COPY --from=build /usr/lib/libbz2.so.1 /usr/lib/libbz2.so.1 
-# COPY --from=build /usr/lib/libpng16.so.16 /usr/lib/libpng16.so.16 
-# COPY --from=build /lib/libz.so.1 /lib/libz.so.1 
-# COPY --from=build /usr/lib/libbrotlidec.so.1 /usr/lib/libbrotlidec.so.1 
-# COPY --from=build /usr/lib/libGL.so.1 /usr/lib/libGL.so.1 
-# COPY --from=build /usr/lib/libharfbuzz.so.0 /usr/lib/libharfbuzz.so.0 
-# COPY --from=build /usr/lib/libdbus-1.so.3 /usr/lib/libdbus-1.so.3 
-# COPY --from=build /usr/lib/libicui18n.so.67 /usr/lib/libicui18n.so.67 
-# COPY --from=build /usr/lib/libicuuc.so.67 /usr/lib/libicuuc.so.67 
-# COPY --from=build /usr/lib/libpcre2-16.so.0 /usr/lib/libpcre2-16.so.0 
-# COPY --from=build /usr/lib/libzstd.so.1 /usr/lib/libzstd.so.1 
-# COPY --from=build /usr/lib/libxcb-util.so.1 /usr/lib/libxcb-util.so.1 
-# COPY --from=build /usr/lib/libXau.so.6 /usr/lib/libXau.so.6 
-# COPY --from=build /usr/lib/libXdmcp.so.6 /usr/lib/libXdmcp.so.6 
-# COPY --from=build /usr/lib/libpcre.so.1 /usr/lib/libpcre.so.1 
-# COPY --from=build /usr/lib/libintl.so.8 /usr/lib/libintl.so.8 
-# COPY --from=build /usr/lib/libbrotlicommon.so.1 /usr/lib/libbrotlicommon.so.1 
-# COPY --from=build /usr/lib/libglapi.so.0 /usr/lib/libglapi.so.0 
-# COPY --from=build /usr/lib/libdrm.so.2 /usr/lib/libdrm.so.2 
-# COPY --from=build /usr/lib/libxcb-glx.so.0 /usr/lib/libxcb-glx.so.0 
-# COPY --from=build /usr/lib/libxcb-dri2.so.0 /usr/lib/libxcb-dri2.so.0 
-# COPY --from=build /usr/lib/libXext.so.6 /usr/lib/libXext.so.6 
-# COPY --from=build /usr/lib/libXfixes.so.3 /usr/lib/libXfixes.so.3 
-# COPY --from=build /usr/lib/libXxf86vm.so.1 /usr/lib/libXxf86vm.so.1 
-# COPY --from=build /usr/lib/libxcb-dri3.so.0 /usr/lib/libxcb-dri3.so.0 
-# COPY --from=build /usr/lib/libxcb-present.so.0 /usr/lib/libxcb-present.so.0 
-# COPY --from=build /usr/lib/libxshmfence.so.1 /usr/lib/libxshmfence.so.1 
-# COPY --from=build /usr/lib/libgraphite2.so.3 /usr/lib/libgraphite2.so.3 
-# COPY --from=build /usr/lib/libicudata.so.67 /usr/lib/libicudata.so.67 
-# COPY --from=build /usr/lib/libbsd.so.0 /usr/lib/libbsd.so.0 
-# COPY --from=build /usr/lib/libmd.so.0 /usr/lib/libmd.so.0 
-# COPY --from=build /usr/lib/libQt5Widgets.so.5 /usr/lib/libQt5Widgets.so.5 
-# COPY --from=build /usr/lib/libQt5Network.so.5 /usr/lib/libQt5Network.so.5 
-# COPY --from=build /lib/libssl.so.1.1 /lib/libssl.so.1.1 
-# COPY --from=build /lib/libcrypto.so.1.1 /lib/libcrypto.so.1.1 
+# Copy dependencies
+COPY --from=build /home/deps /
+COPY --from=build /usr/lib/qt5/plugins/platforms/libqxcb.so /usr/lib/qt5/plugins/platforms/libqxcb.so
 
-# CMD ["/home/sasm/sasm"]
+# Copy sasm
+COPY --from=build /usr/bin/sasm /usr/bin/sasm
+COPY --from=build /usr/share/sasm /usr/share/sasm
 
-# #/usr/lib/qt5/plugins/platforms/libqxcb.so
+CMD ["sasm"]
