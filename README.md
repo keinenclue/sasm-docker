@@ -25,20 +25,32 @@ Sasm-docker simplifies the setup and use of [SASM](https://dman95.github.io/SASM
 - **Easy updating:** The launcher checks for and downloads updates on every start
 
 ## Run
+
 #### Install X server
-- On MacOS [follow these steps](https://gist.github.com/paul-krohn/e45f96181b1cf5e536325d1bdee6c949) but use `xhost +localhost` instead of `xhost +$(hostname).local`.
-- On Windows ...
+
+- On MacOS
+    1. Install XQuartz:
+        - With the dmg from the [official website](https://www.xquartz.org/releases/index.html)
+        - Or with the MacPorts instructions down below on the website
+        - Or use Homebrew `brew cask install xquartz`
+    2. Launch XQuartz. Under the XQuartz menu, select Preferences
+    3. Go to the security tab and ensure "Allow connections from network clients" is checked.
+    4. Restart XQuartz.
+- On Windows [follow these instructions](https://seanthegeek.net/234/graphical-linux-applications-bash-ubuntu-windows/)
 - On Linux you are probaply ready to go :)
 
 #### Install docker
-- On MaxOS ...
-- On Windows ...
+
+- On MaxOS [follow these steps](https://docs.docker.com/desktop/mac/install)
+- On Windows [follow these steps](https://docs.docker.com/desktop/windows/install)
 - On Linux [follow these steps](https://docs.docker.com/engine/install)
 
 #### Install the launcher
--  Download the binary for your OS over here: [https://github.com/keinenclue/sasm-docker/releases/latest](https://github.com/keinenclue/sasm-docker/releases/latest)
+
+- Download the binary for your OS over here: [https://github.com/keinenclue/sasm-docker/releases/latest](https://github.com/keinenclue/sasm-docker/releases/latest)
 
 ## Screenshots
+
 <table align="center">
     <tr>
         <td align="center">
@@ -65,4 +77,3 @@ Sasm-docker simplifies the setup and use of [SASM](https://dman95.github.io/SASM
         </td>
     </tr>
 </table>
-
