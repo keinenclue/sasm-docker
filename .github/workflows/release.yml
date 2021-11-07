@@ -33,9 +33,13 @@ jobs:
           run: |
             cd launcher
             if [ "$RUNNER_OS" == "Windows" ]; then
-              go build -x -o out/launcher-${RUNNER_OS}.exe
+              $(go env GOPATH)/bin/fyne package -os darwin -icon Icon.png
+              mkdir out
+              mv launcher.exe out/launcher-Windows.exe
             elif [ "$RUNNER_OS" == "macOS" ]; then
-              go build -x -o out/launcher-macOS.app
+              $(go env GOPATH)/bin/fyne package -os darwin -icon Icon.png
+              mkdir out
+              mv launcher.app out/launcher-macOS.app
               chmod +x ./out/launcher-macOS.app
               hdiutil create ./out/launcher-macOS.dmg -srcfolder "./out"
               rm ./out/launcher-macOS.app
