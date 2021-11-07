@@ -1,9 +1,8 @@
 FROM i386/alpine as base
 
 RUN apk update && \
-    apk add nasm gcc gdb fontconfig musl-dev libc-dev
-
-RUN rm /var/cache/apk/*
+    apk add nasm gcc gdb fontconfig musl-dev libc-dev &&\
+    rm /var/cache/apk/*
 
 FROM base as build
 
@@ -23,12 +22,12 @@ RUN ldd /usr/bin/sasm | tr -s '[:blank:]' '\n' | grep '^/' | \
 RUN ldd /usr/lib/qt5/plugins/platforms/libqxcb.so | tr -s '[:blank:]' '\n' | grep '^/' | \
     xargs -I % sh -c 'mkdir -p $(dirname /home/deps%); cp % /home/deps%;'
 
-FROM base as runtime    
 
-# Copy fonts
-COPY --from=build /usr/share/fonts/truetype/msttcorefonts/Courier* /usr/share/fonts/truetype/msttcorefonts/
-COPY --from=build /usr/share/fonts/truetype/msttcorefonts/Arial* /usr/share/fonts/truetype/msttcorefonts/
-RUN fc-cache -f -v
+RUN mkdir -p /home/deps/usr/share/fonts/truetype/msttcorefonts
+RUN cp /usr/share/fonts/truetype/msttcorefonts/Courier* /home/deps/usr/share/fonts/truetype/msttcorefonts/
+RUN cp /usr/share/fonts/truetype/msttcorefonts/Arial* /home/deps/usr/share/fonts/truetype/msttcorefonts/
+
+FROM base as runtime    
 
 # Copy dependencies
 COPY --from=build /home/deps /
@@ -37,5 +36,8 @@ COPY --from=build /usr/lib/qt5/plugins/platforms/libqxcb.so /usr/lib/qt5/plugins
 # Copy sasm
 COPY --from=build /usr/bin/sasm /usr/bin/sasm
 COPY --from=build /usr/share/sasm /usr/share/sasm
+
+# Install fonts
+RUN fc-cache -f -v
 
 CMD ["sasm"]

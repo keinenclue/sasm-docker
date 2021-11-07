@@ -58,6 +58,7 @@ You just need to have X server on your system in the end.
 #### Issues
 
 - If you get the warning `warning: creating DT_TEXTREL in a PIE` add the flag `-fPIC` to `Linking options`
+- If the debugging doesn't work, clear your Data path(it's best that you completly delete the folder and then recreate it and put your files back in)
 
 ## Screenshots
 
