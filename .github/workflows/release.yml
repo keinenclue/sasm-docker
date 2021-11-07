@@ -39,10 +39,20 @@ jobs:
             elif [ "$RUNNER_OS" == "macOS" ]; then
               $(go env GOPATH)/bin/fyne package -os darwin -icon Icon.png
               mkdir out
-              mv launcher.app out/launcher-macOS.app
-              chmod +x ./out/launcher-macOS.app
-              hdiutil create ./out/launcher-macOS.dmg -srcfolder "./out"
-              rm -r ./out/launcher-macOS.app
+              mv launcher.app out/SASM\ launcher.app
+              chmod +x ./out/SASM\ launcher.app
+              brew install create-dmg
+              create-dmg \
+                --volname "SASM Launcher" \
+                --window-pos 200 120 \
+                --window-size 800 400 \
+                --icon-size 100 \
+                --icon "SASM launcher.app" 200 190 \
+                --hide-extension "SASM launcher.app" \
+                --app-drop-link 600 185 \
+                "SASM Launcher.dmg" \
+                "out/"
+              rm -r ./out/SASM\ launcher.app
             else
               go build -x -o out/launcher-${RUNNER_OS}
               chmod +x ./out/launcher-${RUNNER_OS}
