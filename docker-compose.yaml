@@ -3,7 +3,7 @@ services:
     #image: ghcr.io/keinenclue/sasm-docker
     build: .
     volumes:
-      - ./sasm:/root
+      #- ./sasm:/root
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /tmp/.docker.xauth:/tmp/.docker.xauth
     environment:
