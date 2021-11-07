@@ -28,6 +28,9 @@ Sasm-docker simplifies the setup and use of [SASM](https://dman95.github.io/SASM
 
 #### Install X server
 
+These are just examples, you don't have to use these installation methods.  
+You just need to have X server on your system in the end.
+
 - On MacOS
     1. Install XQuartz:
         - With the dmg from the [official website](https://www.xquartz.org/releases/index.html)
@@ -36,7 +39,9 @@ Sasm-docker simplifies the setup and use of [SASM](https://dman95.github.io/SASM
     2. Launch XQuartz. Under the XQuartz menu, select Preferences
     3. Go to the security tab and ensure "Allow connections from network clients" is checked.
     4. Restart XQuartz.
-- On Windows [follow these instructions](https://seanthegeek.net/234/graphical-linux-applications-bash-ubuntu-windows/)
+- On Windows
+  - [Install VcXsrv Windows X Server ](https://sourceforge.net/projects/vcxsrv/)
+  - Or install through Chocolatey `choco install vcxsrv`
 - On Linux you are probaply ready to go :)
 
 #### Install docker
