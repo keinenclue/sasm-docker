@@ -78,8 +78,8 @@ You just need to have X server on your system in the end.
     </tr>
     <tr>
        <td align="center">
-            <a href="https://user-images.githubusercontent.com/30153207/140638903-1e6cde6f-e561-4d52-901f-2c4cf784fae6.png">
-                <img src="https://user-images.githubusercontent.com/30153207/140638903-1e6cde6f-e561-4d52-901f-2c4cf784fae6.png"  width="500px" alt="Screenshot logs" />
+            <a href="https://user-images.githubusercontent.com/30153207/140663399-7cb1af3b-ce8f-4551-9aae-954619710607.png">
+                <img src="https://user-images.githubusercontent.com/30153207/140663399-7cb1af3b-ce8f-4551-9aae-954619710607.png"  width="500px" alt="Screenshot logs" />
             </a>
         </td>
         <td align="center">
