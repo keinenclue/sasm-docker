@@ -165,7 +165,7 @@ func (c *LaunchableContainer) Stop() error {
 	return nil
 }
 
-// Remove removes the conatiner
+// Remove removes the container
 func (c *LaunchableContainer) Remove() error {
 	if err := dockerClient.ContainerRemove(ctx, c.containerName, types.ContainerRemoveOptions{Force: true}); err != nil && !client.IsErrNotFound(err) {
 		log.L.Error("Could not remove old container: " + err.Error())
