@@ -1,8 +1,17 @@
 services:
-  sasm:
-    # uncomment in order to build
-    # build: .
-    image: ghcr.io/keinenclue/sasm-docker
+  sasm-linux:
+    #image: ghcr.io/keinenclue/sasm-docker
+    build: .
+    volumes:
+      - ./sasm:/root
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /tmp/.docker.xauth:/tmp/.docker.xauth
+    environment:
+      DISPLAY: ':0'
+      XAUTHORITY: '/tmp/.docker.xauth'
+  sasm-mac-win:
+    # image: ghcr.io/keinenclue/sasm-docker
+    build: .
     volumes:
       - ./sasm:/root
     environment:
