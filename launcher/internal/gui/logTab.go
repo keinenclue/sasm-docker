@@ -2,9 +2,9 @@ package gui
 
 import (
 	"fmt"
-	"math"
 	"os/exec"
 	"runtime"
+	"unicode"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -66,14 +66,8 @@ func appendLog(level string, message string) {
 
 	cells := make([]widget.TextGridCell, 0, len(line))
 	for _, r := range line {
-		cells = append(cells, widget.TextGridCell{Rune: r})
-		if r == '\t' {
-			col := len(cells)
-			tabStop, _ := math.Modf(float64(col-1+logContent.TabWidth) / float64(logContent.TabWidth))
-			next := logContent.TabWidth * int(tabStop)
-			for i := col; i < next; i++ {
-				cells = append(cells, widget.TextGridCell{Rune: ' '})
-			}
+		if unicode.IsGraphic(r) {
+			cells = append(cells, widget.TextGridCell{Rune: r})
 		}
 	}
 
