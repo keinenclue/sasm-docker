@@ -40,19 +40,24 @@ You just need to have X server on your system in the end.
     3. Go to the security tab and ensure "Allow connections from network clients" is checked.
     4. Restart XQuartz.
 - On Windows
-  - [Install VcXsrv Windows X Server ](https://sourceforge.net/projects/vcxsrv/)
+  - [Install VcXsrv Windows X Server](https://sourceforge.net/projects/vcxsrv/)
   - Or install through Chocolatey `choco install vcxsrv`
 - On Linux you are probaply ready to go :)
 
 #### Install docker
 
-- On MaxOS [follow these steps](https://docs.docker.com/desktop/mac/install)
+- On MacOS [follow these steps](https://docs.docker.com/desktop/mac/install)
 - On Windows [follow these steps](https://docs.docker.com/desktop/windows/install)
 - On Linux [follow these steps](https://docs.docker.com/engine/install)
 
 #### Install the launcher
 
 - Download the binary for your OS over here: [https://github.com/keinenclue/sasm-docker/releases/latest](https://github.com/keinenclue/sasm-docker/releases/latest)
+- On MacOS open the dmg and drag the application to you applications folder
+
+#### Issues
+
+- If you get the warning `warning: creating DT_TEXTREL in a PIE` add the flag `-fPIC` to `Linking options`
 
 ## Screenshots
 
