@@ -37,7 +37,6 @@ jobs:
               chmod +x ./out/launcher-macOS.app
               hdiutil create ./out/launcher-macOS.dmg -srcfolder "./out"
               rm ./out/launcher-macOS.app
-              rm ./out/tmp.dmg
             else
               go build -o out/launcher-${RUNNER_OS}
               chmod +x ./out/launcher-${RUNNER_OS}
