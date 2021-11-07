@@ -35,8 +35,7 @@ jobs:
             elif [ "$RUNNER_OS" == "macOS" ]; then
               go build -o out/launcher-macOS.app
               chmod +x ./out/launcher-macOS.app
-              hdiutil create /out/tmp.dmg -ov -volname "launcher-macOS" -fs HFS+ -srcfolder "./out"
-              hdiutil convert /out/tmp.dmg -format UDZO -o launcher-macOS.dmg
+              hdiutil create /out/launcher-macOS.dmg -volname "launcher-macOS" -srcfolder "./out"
               rm ./out/launcher-macOS.app
               rm ./out/tmp.dmg
             else
