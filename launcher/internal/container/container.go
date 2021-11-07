@@ -38,6 +38,7 @@ type Event struct {
 // LaunchableContainer is a container which can be launched by this launcher
 type LaunchableContainer struct {
 	onContainerEventFuncs []OnContainerEventFuc
+	preStartFuc           preStartFuc
 	image                 string
 	containerBody         *container.ContainerCreateCreatedBody
 	containerName         string
@@ -80,6 +81,8 @@ const (
 // OnContainerEventFuc is the type of a callback function which gets called on every container event
 type OnContainerEventFuc func(event Event)
 
+type preStartFuc func(*LaunchableContainer)
+
 // A custom console writer that allows us to keep a function blocked until the
 // given stream is properly closed. This does nothing special, only exists to
 // make a noop io.Writer.
@@ -117,9 +120,10 @@ func (c *LaunchableContainer) OnContainerEvent(callback OnContainerEventFuc) {
 	c.onContainerEventFuncs = append(c.onContainerEventFuncs, callback)
 }
 
-func newContainer(image string, containerID string, containerEnv []string, containerBinds []string) (*LaunchableContainer, error) {
+func newContainer(image string, containerID string, containerEnv []string, containerBinds []string, preStartFunc preStartFuc) (*LaunchableContainer, error) {
 
 	c := LaunchableContainer{
+		preStartFuc:    preStartFunc,
 		image:          image,
 		containerName:  containerID,
 		containerEnv:   containerEnv,
@@ -200,9 +204,14 @@ func (c *LaunchableContainer) Pull() error {
 	return nil
 }
 
+func (c *LaunchableContainer) executePreStart() {
+	c.preStartFuc(c)
+}
+
 // Start starts the container
 func (c *LaunchableContainer) Start() error {
 	c.setState(StartingState)
+	c.executePreStart()
 	cont, err := dockerClient.ContainerCreate(
 		ctx,
 		&container.Config{

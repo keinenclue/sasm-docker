@@ -2,6 +2,7 @@ package container
 
 import (
 	"fmt"
+	"os/exec"
 	"runtime"
 
 	"github.com/keinenclue/sasm-docker/launcher/internal/config"
@@ -26,5 +27,10 @@ func NewSasmContainer() (*LaunchableContainer, error) {
 	containerBinds = append(containerBinds, config.Get("dataPath").(string)+"/.config:/root/.config")
 	containerBinds = append(containerBinds, config.Get("dataPath").(string)+"/Projects:/usr/share/sasm/Projects")
 
-	return newContainer(image, "sasm_docker_container", containerEnv, containerBinds)
+	return newContainer(image, "sasm_docker_container", containerEnv, containerBinds, func(c *LaunchableContainer) {
+		if runtime.GOOS == "darwin" {
+			c := exec.Command("xhost", "+localhost")
+			c.Run()
+		}
+	})
 }
