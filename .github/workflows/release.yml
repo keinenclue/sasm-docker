@@ -42,7 +42,7 @@ jobs:
               mv launcher.app out/launcher-macOS.app
               chmod +x ./out/launcher-macOS.app
               hdiutil create ./out/launcher-macOS.dmg -srcfolder "./out"
-              rm ./out/launcher-macOS.app
+              rm -r ./out/launcher-macOS.app
             else
               go build -x -o out/launcher-${RUNNER_OS}
               chmod +x ./out/launcher-${RUNNER_OS}
