@@ -1,5 +1,5 @@
 <h1 align="center">
-    <img src="https://github.com/keinenclue/sasm-docker/blob/main/launcher/Icon.png?raw=true" width="300px" ></img>
+    <img src="https://github.com/keinenclue/sasm-docker/blob/main/launcher/Icon.png?raw=true" width="200px" ></img><br>
     Sasm-docker
 </h1>
 
