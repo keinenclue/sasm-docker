@@ -10,7 +10,7 @@ func GetDockerExecPath() string {
 	return getExecPath(map[string]string{
 		"linux":   "docker",
 		"windows": "docker.exe",
-		"darwin":  "docker",
+		"darwin":  "Docker.app",
 	})
 }
 
