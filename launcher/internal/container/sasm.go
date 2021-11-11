@@ -28,12 +28,20 @@ func NewSasmContainer() (*LaunchableContainer, error) {
 	containerBinds = append(containerBinds, config.Get("dataPath").(string)+"/Projects:/usr/share/sasm/Projects")
 
 	return newContainer(image, "sasm_docker_container", containerEnv, containerBinds, func(c *LaunchableContainer) {
+		var e error
 		if runtime.GOOS == "darwin" {
-			c := exec.Command("xhost", "+localhost")
-			c.Run()
+			com := exec.Command("xhost", "+localhost")
+			e = com.Run()
 		} else if runtime.GOOS == "linux" {
-			c := exec.Command("xhost", "SI:localuser:root")
-			c.Run()
+			com := exec.Command("xhost", "SI:localuser:root")
+			e = com.Run()
+		}
+
+		if e != nil {
+			c.handleContainerEvent(Event{
+				Type: ConsoleOutput,
+				Data: e.Error(),
+			})
 		}
 	})
 }
