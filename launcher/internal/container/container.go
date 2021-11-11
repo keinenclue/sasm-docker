@@ -149,30 +149,34 @@ func newContainer(image string, containerID string, containerEnv []string, conta
 
 // Launch launches the container
 func (c *LaunchableContainer) Launch() error {
-
+	var err error
 	c.setState(LaunchingState)
 	c.isLaunching = true
+
 	defer func() {
 		c.isLaunching = false
+		if err != nil {
+			c.setState(StoppingState)
+		}
 	}()
 
-	if err := c.Stop(); err != nil {
+	if err = c.Stop(); err != nil {
 		return err
 	}
 
-	if err := c.Remove(); err != nil {
+	if err = c.Remove(); err != nil {
 		return err
 	}
 
-	if err := c.Pull(); err != nil {
+	if err = c.Pull(); err != nil {
 		return err
 	}
 
-	if err := c.Start(); err != nil {
+	if err = c.Start(); err != nil {
 		return err
 	}
 
-	if err := c.Attach(); err != nil {
+	if err = c.Attach(); err != nil {
 		return err
 	}
 
