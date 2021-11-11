@@ -104,7 +104,7 @@ func handleContainerEvent(layerProgress map[string]*widget.ProgressBar, vBox *fy
 			}
 			if state != c.PullingState && len(layerProgress) > 0 {
 				for _, bar := range layerProgress {
-					vBox.Remove(bar)
+					bar.Hide()
 				}
 				layerProgress = map[string]*widget.ProgressBar{}
 			}
