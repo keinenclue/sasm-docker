@@ -3,6 +3,7 @@ package gui
 import (
 	"fmt"
 	"math"
+	"runtime"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -17,12 +18,20 @@ var statusLabel *widget.Label = nil
 var statusLabelSameMessageCount = 0
 
 func newLaunchTab(w fyne.Window) fyne.CanvasObject {
-	hello := widget.NewLabel(`Welcome to the sasm docker launcher!
-Before you start, make sure to have these tools installed:
-- Docker
-- XServer
+	var hellos string
 
-Once you have them installed, just click Launch :D`)
+	if runtime.GOOS == "darwin" {
+		hellos = `XQuartz`
+	} else {
+		hellos = `XServer`
+	}
+
+	hello := widget.NewLabel(fmt.Sprintf(`Welcome to the sasm docker launcher!
+	Before you start, make sure to have these tools installed:
+	- Docker
+	- %s
+	
+	Once you have them installed, just click Launch :D`, hellos))
 
 	statusLabel = widget.NewLabel("")
 
