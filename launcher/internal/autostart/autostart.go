@@ -1,7 +1,10 @@
 package autostart
 
 import (
+	"fmt"
 	"os/exec"
+	"runtime"
+	"strings"
 	"time"
 
 	"github.com/keinenclue/sasm-docker/launcher/internal/config"
@@ -13,8 +16,14 @@ func StartAll() {
 	for _, program := range programs {
 		if config.Get("autostart." + program + ".enabled").(bool) {
 			exe := config.Get("autostart." + program + ".path").(string)
-			cmd := exec.Command(exe, "arg")
-			cmd.Start()
+			var cmd *exec.Cmd
+			if runtime.GOOS == "darwin" && strings.HasSuffix(exe, ".app") {
+				cmd = exec.Command("/usr/bin/open", exe)
+			} else {
+				cmd = exec.Command(exe)
+			}
+			e := cmd.Start()
+			fmt.Println(e)
 			time.Sleep(2 * time.Second)
 		}
 	}

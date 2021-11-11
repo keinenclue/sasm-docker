@@ -3,6 +3,7 @@ package util
 import (
 	"os/exec"
 	"runtime"
+	"strings"
 )
 
 // GetDockerExecPath returns the default path oft the docker executable
@@ -10,7 +11,7 @@ func GetDockerExecPath() string {
 	return getExecPath(map[string]string{
 		"linux":   "docker",
 		"windows": "docker.exe",
-		"darwin":  "Docker.app",
+		"darwin":  "/Applications/Docker.app",
 	})
 }
 
@@ -19,12 +20,17 @@ func GetXserverExecPath() string {
 	return getExecPath(map[string]string{
 		"linux":   "Xorg",
 		"windows": "xlaunch.exe",
-		"darwin":  "XQuartz.app",
+		"darwin":  "/opt/X11/bin/xquartz",
 	})
 }
 
 func getExecPath(execNames map[string]string) string {
-	path, err := exec.LookPath(execNames[runtime.GOOS])
+	execName := execNames[runtime.GOOS]
+	if runtime.GOOS == "darwin" && strings.HasSuffix(execName, ".app") {
+		return execName
+	}
+
+	path, err := exec.LookPath(execName)
 	if err != nil {
 		return ""
 	}
