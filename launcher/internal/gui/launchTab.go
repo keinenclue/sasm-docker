@@ -119,28 +119,30 @@ func handleContainerEvent(layerProgress map[string]*widget.ProgressBar, vBox *fy
 
 func launchImage(startButton *widget.Button, vBox *fyne.Container) func() {
 	return func() {
-		startButton.Hide()
-		newLogSession()
-		statusLabel.SetText("")
+		go func() {
+			startButton.Hide()
+			newLogSession()
+			statusLabel.SetText("")
 
-		launchAppendLog("INFO", "Starting autostart programs if configured ...")
-		autostart.StartAll()
+			launchAppendLog("INFO", "Starting autostart programs if configured ...")
+			autostart.StartAll()
 
-		cont, err := c.NewSasmContainer()
+			cont, err := c.NewSasmContainer()
 
-		if err != nil {
-			launchAppendLog("ERROR", err.Error())
-			tabs.SelectTabIndex(1)
-			return
-		}
+			if err != nil {
+				launchAppendLog("ERROR", err.Error())
+				tabs.SelectTabIndex(1)
+				return
+			}
 
-		layerProgress := make(map[string]*widget.ProgressBar)
-		cont.OnContainerEvent(handleContainerEvent(layerProgress, vBox, startButton))
-		err = cont.Launch()
+			layerProgress := make(map[string]*widget.ProgressBar)
+			cont.OnContainerEvent(handleContainerEvent(layerProgress, vBox, startButton))
+			err = cont.Launch()
 
-		if err != nil {
-			launchAppendLog("ERROR", err.Error())
-			tabs.SelectTabIndex(1)
-		}
+			if err != nil {
+				launchAppendLog("ERROR", err.Error())
+				tabs.SelectTabIndex(1)
+			}
+		}()
 	}
 }
