@@ -194,6 +194,7 @@ func (c *LaunchableContainer) Launch() error {
 	return nil
 }
 
+// WaitForDockerDaemon trys to connect to the docker daemon 12 times in a 5 second interval before giving up.
 func (c *LaunchableContainer) WaitForDockerDaemon() error {
 	var err error
 	var retryCount = 0
