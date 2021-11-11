@@ -39,7 +39,7 @@ func NewSasmContainer() (*LaunchableContainer, error) {
 
 		if e != nil {
 			c.handleContainerEvent(Event{
-				Type: ConsoleOutput,
+				Type: LogMessage,
 				Data: e.Error(),
 			})
 		}

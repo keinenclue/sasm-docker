@@ -89,6 +89,8 @@ const (
 	StateChanged
 	// ConsoleOutput means that there was some console output by the container
 	ConsoleOutput
+	// LogMessage means there was some important log from docker
+	LogMessage
 )
 
 // OnContainerEventFuc is the type of a callback function which gets called on every container event
@@ -156,9 +158,17 @@ func (c *LaunchableContainer) Launch() error {
 	defer func() {
 		c.isLaunching = false
 		if err != nil {
+			c.handleContainerEvent(Event{
+				Type: LogMessage,
+				Data: err.Error(),
+			})
 			c.setState(OfflineState)
 		}
 	}()
+
+	if err = c.WaitForDockerDaemon(); err != nil {
+		return err
+	}
 
 	if err = c.Stop(); err != nil {
 		return err
@@ -181,6 +191,24 @@ func (c *LaunchableContainer) Launch() error {
 	}
 
 	return nil
+}
+
+func (c *LaunchableContainer) WaitForDockerDaemon() error {
+	var err error
+	var retryCount = 0
+
+	_, err = dockerClient.ContainerList(context.Background(), types.ContainerListOptions{})
+	for err != nil && client.IsErrConnectionFailed(err) && retryCount < 12 {
+		retryCount++
+		c.handleContainerEvent(Event{
+			Type: LogMessage,
+			Data: err.Error() + ", retrying in 5 seconds...",
+		})
+		_, err = dockerClient.ContainerList(context.Background(), types.ContainerListOptions{})
+		time.Sleep(time.Second * 5)
+	}
+
+	return err
 }
 
 // Stop stops the container

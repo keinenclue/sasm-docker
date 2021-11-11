@@ -3,6 +3,7 @@ package gui
 import (
 	"fmt"
 	"math"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -13,6 +14,7 @@ import (
 )
 
 var statusLabel *widget.Label = nil
+var statusLabelSameMessageCount = 0
 
 func newLaunchTab(w fyne.Window) fyne.CanvasObject {
 	hello := widget.NewLabel(`Welcome to the sasm docker launcher!
@@ -39,6 +41,12 @@ Once you have them installed, just click Launch :D`)
 
 func launchAppendLog(level string, message string) {
 	if level != "CONTAINER" {
+		if statusLabel.Text == message || strings.HasSuffix(statusLabel.Text, message) {
+			statusLabelSameMessageCount++
+			message = fmt.Sprintf("(%d) %s", statusLabelSameMessageCount, message)
+		} else {
+			statusLabelSameMessageCount = 0
+		}
 		statusLabel.SetText(message)
 	}
 	appendLog(level, message)
@@ -103,6 +111,8 @@ func handleContainerEvent(layerProgress map[string]*widget.ProgressBar, vBox *fy
 
 		case c.ConsoleOutput:
 			launchAppendLog("CONTAINER", event.Data.(string))
+		case c.LogMessage:
+			launchAppendLog("LOG", event.Data.(string))
 		}
 	}
 }
