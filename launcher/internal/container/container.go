@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/containerd/containerd/log"
@@ -198,11 +199,16 @@ func (c *LaunchableContainer) WaitForDockerDaemon() error {
 	var retryCount = 0
 
 	_, err = dockerClient.ContainerList(context.Background(), types.ContainerListOptions{})
-	for err != nil && client.IsErrConnectionFailed(err) && retryCount < 12 {
+	for err != nil && (client.IsErrConnectionFailed(err) ||
+		strings.HasSuffix(err.Error(), "connection refused")) && retryCount < 12 {
 		retryCount++
 		c.handleContainerEvent(Event{
-			Type: LogMessage,
+			Type: ConsoleOutput,
 			Data: err.Error() + ", retrying in 5 seconds...",
+		})
+		c.handleContainerEvent(Event{
+			Type: LogMessage,
+			Data: fmt.Sprintf("Waiting for the docker daemon to start, tried %d times to connect", retryCount),
 		})
 		_, err = dockerClient.ContainerList(context.Background(), types.ContainerListOptions{})
 		time.Sleep(time.Second * 5)

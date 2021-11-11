@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"runtime"
 
 	"github.com/keinenclue/sasm-docker/launcher/internal/util"
 	"github.com/spf13/viper"
@@ -25,7 +26,7 @@ func SetupWithName(configPath string, configName string) error {
 	viper.AddConfigPath(".")
 	viper.SetDefault("dataPath", configPath)
 	viper.SetDefault("autostart.docker.path", util.GetDockerExecPath())
-	viper.SetDefault("autostart.docker.enabled", false)
+	viper.SetDefault("autostart.docker.enabled", runtime.GOOS == "darwin")
 	viper.SetDefault("autostart.xserver.path", util.GetXserverExecPath())
 	viper.SetDefault("autostart.xserver.enabled", false)
 
