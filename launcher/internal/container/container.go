@@ -156,7 +156,7 @@ func (c *LaunchableContainer) Launch() error {
 	defer func() {
 		c.isLaunching = false
 		if err != nil {
-			c.setState(StoppingState)
+			c.setState(OfflineState)
 		}
 	}()
 
