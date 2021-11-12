@@ -17,9 +17,11 @@ func newSettingsTab(w fyne.Window) fyne.CanvasObject {
 	vBox := container.NewVBox()
 	vBox.AddObject(widget.NewLabel("Here you can change some settings :)\nThe settings are stored in: " + config.PathUsed() + "/config.yml"))
 
-	newPathConfig("dataPath", "Data path", w, newConfigSection(vBox), false)
-
 	c := newConfigSection(vBox)
+	newPathConfig("dataPath", "Data path", w, c, false)
+	newSwitchConfig("closeAfterLaunch", "Close after successfull launch", c)
+
+	c = newConfigSection(vBox)
 	newSwitchConfig("autostart.docker.enabled", "Enable Docker autostart", c)
 	newPathConfig("autostart.docker.path", "Docker executable path", w, c, true)
 

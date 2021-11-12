@@ -10,13 +10,14 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"github.com/keinenclue/sasm-docker/launcher/internal/autostart"
+	"github.com/keinenclue/sasm-docker/launcher/internal/config"
 	c "github.com/keinenclue/sasm-docker/launcher/internal/container"
 )
 
 var statusLabel *widget.Label = nil
 var statusLabelSameMessageCount = 0
 
-func newLaunchTab(w fyne.Window) fyne.CanvasObject {
+func newLaunchTab(a fyne.App, w fyne.Window) fyne.CanvasObject {
 	hello := widget.NewLabel(`Welcome to the sasm docker launcher!
 Before you start, make sure to have these tools installed:
 - Docker
@@ -35,7 +36,7 @@ Once you have them installed, just click Launch :D`)
 		startButton,
 	)
 
-	startButton.OnTapped = launchImage(startButton, vBox)
+	startButton.OnTapped = launchImage(a, startButton, vBox)
 	return vBox
 }
 
@@ -52,7 +53,7 @@ func launchAppendLog(level string, message string) {
 	appendLog(level, message)
 }
 
-func handleContainerEvent(layerProgress map[string]*widget.ProgressBar, vBox *fyne.Container, startButton *widget.Button) func(event c.Event) {
+func handleContainerEvent(app fyne.App, layerProgress map[string]*widget.ProgressBar, vBox *fyne.Container, startButton *widget.Button) func(event c.Event) {
 	return func(event c.Event) {
 		switch event.Type {
 		case c.ImagePullStatusChanged:
@@ -99,6 +100,10 @@ func handleContainerEvent(layerProgress map[string]*widget.ProgressBar, vBox *fy
 				endLogsSession()
 				statusLabel.SetText("Sasm exited")
 				startButton.Show()
+			case c.RunningState:
+				if config.Get("closeAfterLaunch").(bool) {
+					app.Quit()
+				}
 			default:
 				startButton.Hide()
 			}
@@ -117,7 +122,7 @@ func handleContainerEvent(layerProgress map[string]*widget.ProgressBar, vBox *fy
 	}
 }
 
-func launchImage(startButton *widget.Button, vBox *fyne.Container) func() {
+func launchImage(app fyne.App, startButton *widget.Button, vBox *fyne.Container) func() {
 	return func() {
 		go func() {
 			startButton.Hide()
@@ -136,7 +141,7 @@ func launchImage(startButton *widget.Button, vBox *fyne.Container) func() {
 			}
 
 			layerProgress := make(map[string]*widget.ProgressBar)
-			cont.OnContainerEvent(handleContainerEvent(layerProgress, vBox, startButton))
+			cont.OnContainerEvent(handleContainerEvent(app, layerProgress, vBox, startButton))
 			err = cont.Launch()
 
 			if err != nil {

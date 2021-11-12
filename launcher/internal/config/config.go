@@ -25,6 +25,7 @@ func SetupWithName(configPath string, configName string) error {
 	viper.AddConfigPath(configPath)
 	viper.AddConfigPath(".")
 	viper.SetDefault("dataPath", configPath)
+	viper.SetDefault("closeAfterLaunch", false)
 	viper.SetDefault("autostart.docker.path", util.GetDockerExecPath())
 	viper.SetDefault("autostart.docker.enabled", runtime.GOOS == "darwin")
 	viper.SetDefault("autostart.xserver.path", util.GetXserverExecPath())

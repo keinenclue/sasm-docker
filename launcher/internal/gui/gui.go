@@ -10,11 +10,11 @@ var currentTabIndex = 0
 var tabs *container.AppTabs = nil
 
 // New creates the gui
-func New(w fyne.Window) fyne.CanvasObject {
+func New(a fyne.App, w fyne.Window) fyne.CanvasObject {
 	c.New()
 
 	tabs = container.NewAppTabs(
-		container.NewTabItem("Launch", newLaunchTab(w)),
+		container.NewTabItem("Launch", newLaunchTab(a, w)),
 		container.NewTabItem("Logs", newLogTab(w)),
 		container.NewTabItem("Settings", newSettingsTab(w)),
 	)
