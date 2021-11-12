@@ -1,3 +1,5 @@
 fyne-cross
 launcher
 Makefile
+launcher.app
+launcher.exe
