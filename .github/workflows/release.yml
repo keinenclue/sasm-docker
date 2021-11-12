@@ -72,7 +72,7 @@ jobs:
   tagged-release:
     name: "Tagged Release"
     runs-on: "ubuntu-latest"
-    needs: [build-and-push-docker, build-launcher]
+    needs: build-launcher
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
 
     steps:
