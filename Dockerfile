@@ -10,9 +10,9 @@ RUN apk add build-base qt5-qtbase-dev unzip curl \
     msttcorefonts-installer && \
     update-ms-fonts && \
     fc-cache -f && \
-    curl -L -o sasm.zip https://github.com/Dman95/SASM/archive/refs/tags/v3.12.1.zip && \
+    curl -L -o sasm.zip https://codeload.github.com/schreiberx/SASM/zip/refs/heads/master && \
     unzip sasm.zip -d /home && \
-    cd /home/SASM-3.12.1 && qmake-qt5 && make && make install
+    cd /home/SASM-master && qmake-qt5 && make && make install
 
 
 # Source: https://gist.github.com/bcardiff/85ae47e66ff0df35a78697508fcb49af#gistcomment-2078660 
