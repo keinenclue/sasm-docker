@@ -10,7 +10,6 @@ jobs:
   build-and-push-docker:
     name: Build and push Docker image to GhCr
     runs-on: ubuntu-latest
-    needs: build-launcher
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     steps:
       - name: Check out the repo
