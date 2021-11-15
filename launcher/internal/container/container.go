@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"github.com/keinenclue/sasm-docker/launcher/internal/config"
 	"github.com/pterodactyl/wings/system"
 )
 
@@ -92,6 +94,8 @@ const (
 	ConsoleOutput
 	// LogMessage means there was some important log from docker
 	LogMessage
+	// ErrorMessage means there was some error log from docker
+	ErrorMessage
 )
 
 // OnContainerEventFuc is the type of a callback function which gets called on every container event
@@ -153,6 +157,9 @@ func newContainer(image string, containerID string, containerEnv []string, conta
 // Launch launches the container
 func (c *LaunchableContainer) Launch() error {
 	var err error
+	var imageExists bool
+	offlineMode := config.Get("offlineMode").(bool)
+
 	c.setState(LaunchingState)
 	c.isLaunching = true
 
@@ -160,7 +167,7 @@ func (c *LaunchableContainer) Launch() error {
 		c.isLaunching = false
 		if err != nil {
 			c.handleContainerEvent(Event{
-				Type: LogMessage,
+				Type: ErrorMessage,
 				Data: err.Error(),
 			})
 			c.setState(OfflineState)
@@ -179,8 +186,14 @@ func (c *LaunchableContainer) Launch() error {
 		return err
 	}
 
-	if err = c.Pull(); err != nil {
+	imageExists, _ = c.ImageExists()
+	if !imageExists && offlineMode {
+		err = errors.New("The image is not pulled yet and offline mode is enabled! Please disable offline mode and try again!")
 		return err
+	} else if !offlineMode {
+		if err = c.Pull(); err != nil && !imageExists {
+			return err
+		}
 	}
 
 	if err = c.Start(); err != nil {
@@ -199,7 +212,7 @@ func (c *LaunchableContainer) WaitForDockerDaemon() error {
 	var err error
 	var retryCount = 0
 
-	_, err = dockerClient.ContainerList(context.Background(), types.ContainerListOptions{})
+	_, err = dockerClient.ContainerList(ctx, types.ContainerListOptions{})
 	for err != nil && (client.IsErrConnectionFailed(err) ||
 		strings.HasSuffix(err.Error(), "connection refused")) && retryCount < 12 {
 		retryCount++
@@ -211,7 +224,7 @@ func (c *LaunchableContainer) WaitForDockerDaemon() error {
 			Type: LogMessage,
 			Data: fmt.Sprintf("Waiting for the docker daemon to start, tried %d times to connect", retryCount),
 		})
-		_, err = dockerClient.ContainerList(context.Background(), types.ContainerListOptions{})
+		_, err = dockerClient.ContainerList(ctx, types.ContainerListOptions{})
 		time.Sleep(time.Second * 5)
 	}
 
@@ -239,12 +252,28 @@ func (c *LaunchableContainer) Remove() error {
 	return nil
 }
 
+// ImageExists checks if the image exists
+func (c *LaunchableContainer) ImageExists() (bool, error) {
+	images, err := dockerClient.ImageList(ctx, types.ImageListOptions{})
+	if err != nil {
+		return false, err
+	}
+
+	for _, image := range images {
+		if len(image.RepoTags) > 0 && (image.RepoTags[0] == c.image || image.RepoTags[0] == c.image+":latest") {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
 // Pull pulls the container
 func (c *LaunchableContainer) Pull() error {
 	c.setState(PullingState)
 	defer c.setState(OfflineState)
 
-	reader, err := dockerClient.ImagePull(ctx, image, types.ImagePullOptions{})
+	reader, err := dockerClient.ImagePull(ctx, c.image, types.ImagePullOptions{})
 	if err != nil {
 		return err
 	}
@@ -275,7 +304,7 @@ func (c *LaunchableContainer) Start() error {
 	cont, err := dockerClient.ContainerCreate(
 		ctx,
 		&container.Config{
-			Image: image,
+			Image: c.image,
 			Env:   c.containerEnv,
 		},
 		&container.HostConfig{

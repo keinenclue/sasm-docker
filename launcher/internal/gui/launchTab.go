@@ -127,6 +127,8 @@ func handleContainerEvent(app fyne.App, layerProgress map[string]*widget.Progres
 			launchAppendLog("CONTAINER", event.Data.(string))
 		case c.LogMessage:
 			launchAppendLog("LOG", event.Data.(string))
+		case c.ErrorMessage:
+			launchAppendLog("ERROR", event.Data.(string))
 		}
 	}
 }

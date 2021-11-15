@@ -20,6 +20,7 @@ func newSettingsTab(w fyne.Window) fyne.CanvasObject {
 	c := newConfigSection(vBox)
 	newPathConfig("dataPath", "Data path", w, c, false)
 	newSwitchConfig("closeAfterLaunch", "Close after successfull launch", c)
+	newSwitchConfig("offlineMode", "Offline mode", c)
 
 	c = newConfigSection(vBox)
 	newSwitchConfig("autostart.docker.enabled", "Enable Docker autostart", c)

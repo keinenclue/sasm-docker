@@ -8,8 +8,6 @@ import (
 	"github.com/keinenclue/sasm-docker/launcher/internal/config"
 )
 
-const image string = "ghcr.io/keinenclue/sasm-docker"
-
 // NewSasmContainer creates a new launchable sasm container
 func NewSasmContainer() (*LaunchableContainer, error) {
 	containerEnv := []string{}
@@ -27,7 +25,7 @@ func NewSasmContainer() (*LaunchableContainer, error) {
 	containerBinds = append(containerBinds, config.Get("dataPath").(string)+"/.config:/root/.config")
 	containerBinds = append(containerBinds, config.Get("dataPath").(string)+"/Projects:/usr/share/sasm/Projects")
 
-	return newContainer(image, "sasm_docker_container", containerEnv, containerBinds, func(c *LaunchableContainer) {
+	return newContainer("ghcr.io/keinenclue/sasm-docker", "sasm_docker_container", containerEnv, containerBinds, func(c *LaunchableContainer) {
 		var e error
 		if runtime.GOOS == "darwin" {
 			c := exec.Command("/opt/X11/bin/xhost", "+localhost")
