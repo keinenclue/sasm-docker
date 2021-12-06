@@ -58,6 +58,7 @@ You just need to have X server on your system in the end.
 
 #### Known issues
 
+- On MacOS XQuartz needs closed before starting sasm-docker(and then be started by sasm-docker) (See [Issue #4](https://github.com/keinenclue/sasm-docker/issues/4))
 - If you get the warning `warning: creating DT_TEXTREL in a PIE` add the flag `-fPIC` to `Linking options`
 - Debugging of a project which uses multiple files will not work ([this is a bug in sasm](https://github.com/Dman95/SASM/issues/102))
 - Debugging will not work if you have a function which is not delcared as global
