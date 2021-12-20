@@ -63,7 +63,7 @@ You just need to have X server on your system in the end.
 - Debugging of a project which uses multiple files will not work ([this is a bug in sasm](https://github.com/Dman95/SASM/issues/102))
 - Debugging will not work if you have a function which is not delcared as global
 - If the debugging doesn't work, clear your Data path(it's best that you completly delete the folder and then recreate it and put your files back in)
-
+- Assembling, running and debugging **does not work** on Apple M1 based systems. See [this issue](https://github.com/keinenclue/sasm-docker/issues/5) for more details
 ## Screenshots
 
 <table align="center">
