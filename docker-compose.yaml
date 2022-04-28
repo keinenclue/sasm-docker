@@ -1,7 +1,9 @@
 services:
   sasm-linux:
     #image: ghcr.io/keinenclue/sasm-docker
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.x64
     volumes:
       #- ./sasm:/root
       - /tmp/.X11-unix:/tmp/.X11-unix
