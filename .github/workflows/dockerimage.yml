@@ -2,7 +2,10 @@ name: "Build docker image"
 
 on:
   push:
-  workflow_dispatch:
+    branches:
+      - main
+    paths:
+      - '**.Dockerfile'
 
 jobs:
   build-and-push-docker-alpine-32:
