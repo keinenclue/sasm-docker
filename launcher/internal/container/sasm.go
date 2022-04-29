@@ -36,7 +36,7 @@ func NewSasmContainer(image string) (*LaunchableContainer, error) {
 	containerBinds = append(containerBinds, config.Get("dataPath").(string)+"/.config:/root/.config")
 	containerBinds = append(containerBinds, config.Get("dataPath").(string)+"/Projects:/usr/share/sasm/Projects")
 
-	return newContainer("ghcr.io/keinenclue/sasm-docker-"+image, "sasm_docker_container", containerEnv, containerBinds, func(c *LaunchableContainer) {
+	return newContainer("ghcr.io/keinenclue/"+image, "sasm_docker_container", containerEnv, containerBinds, func(c *LaunchableContainer) {
 		var e error
 		if runtime.GOOS == "darwin" {
 			c := exec.Command("/opt/X11/bin/xhost", "+localhost")
