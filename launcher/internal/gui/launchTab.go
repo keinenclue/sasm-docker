@@ -35,17 +35,26 @@ func newLaunchTab(a fyne.App, w fyne.Window) fyne.CanvasObject {
 	Once you have them installed, just click Launch :D`, hellos))
 
 	statusLabel = widget.NewLabel("")
+	imageSelector := widget.NewSelect(c.AvailableImages(), nil)
+	imageSelector.SetSelected("test")
+	imageSelector.PlaceHolder = "(select an image)"
 
 	startButton := widget.NewButton("Launch!", nil)
+	imageSelector.OnChanged = handleContainerSelectionChanged(startButton)
+
+	if imageSelector.SelectedIndex() == -1 {
+		startButton.Disable()
+	}
 
 	vBox := container.NewVBox(
 		hello,
 		layout.NewSpacer(),
 		statusLabel,
+		imageSelector,
 		startButton,
 	)
 
-	startButton.OnTapped = launchImage(a, startButton, vBox)
+	startButton.OnTapped = launchImage(a, startButton, imageSelector, vBox)
 	return vBox
 }
 
@@ -62,7 +71,14 @@ func launchAppendLog(level string, message string) {
 	appendLog(level, message)
 }
 
-func handleContainerEvent(app fyne.App, layerProgress map[string]*widget.ProgressBar, vBox *fyne.Container, startButton *widget.Button) func(event c.Event) {
+func handleContainerSelectionChanged(startButton *widget.Button) func(string) {
+	return func(selectedImage string) {
+		fmt.Println(selectedImage)
+		startButton.Enable()
+	}
+}
+
+func handleContainerEvent(app fyne.App, layerProgress map[string]*widget.ProgressBar, vBox *fyne.Container, startButton *widget.Button, imageSelector *widget.Select) func(event c.Event) {
 	return func(event c.Event) {
 		switch event.Type {
 		case c.ImagePullStatusChanged:
@@ -106,9 +122,7 @@ func handleContainerEvent(app fyne.App, layerProgress map[string]*widget.Progres
 
 			switch state {
 			case c.OfflineState:
-				endLogsSession()
-				statusLabel.SetText("Sasm exited")
-				startButton.Show()
+				handleEndOfSession(startButton, imageSelector)
 			case c.RunningState:
 				if config.Get("closeAfterLaunch").(bool) {
 					app.Quit()
@@ -133,32 +147,42 @@ func handleContainerEvent(app fyne.App, layerProgress map[string]*widget.Progres
 	}
 }
 
-func launchImage(app fyne.App, startButton *widget.Button, vBox *fyne.Container) func() {
+func launchImage(app fyne.App, startButton *widget.Button, imageSelector *widget.Select, vBox *fyne.Container) func() {
 	return func() {
 		go func() {
 			startButton.Hide()
+			imageSelector.Hide()
 			newLogSession()
 			statusLabel.SetText("")
 
 			launchAppendLog("INFO", "Starting autostart programs if configured ...")
 			autostart.StartAll()
 
-			cont, err := c.NewSasmContainer()
+			cont, err := c.NewSasmContainer(imageSelector.Selected)
 
 			if err != nil {
 				launchAppendLog("ERROR", err.Error())
 				tabs.SelectTabIndex(1)
+				handleEndOfSession(startButton, imageSelector)
 				return
 			}
 
 			layerProgress := make(map[string]*widget.ProgressBar)
-			cont.OnContainerEvent(handleContainerEvent(app, layerProgress, vBox, startButton))
+			cont.OnContainerEvent(handleContainerEvent(app, layerProgress, vBox, startButton, imageSelector))
 			err = cont.Launch()
 
 			if err != nil {
 				launchAppendLog("ERROR", err.Error())
 				tabs.SelectTabIndex(1)
+				handleEndOfSession(startButton, imageSelector)
 			}
 		}()
 	}
+}
+
+func handleEndOfSession(startButton *widget.Button, imageSelector *widget.Select) {
+	endLogsSession()
+	statusLabel.SetText("Sasm exited")
+	startButton.Show()
+	imageSelector.Show()
 }

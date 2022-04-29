@@ -1,6 +1,7 @@
 package container
 
 import (
+	"errors"
 	"fmt"
 	"os/exec"
 	"runtime"
@@ -8,8 +9,18 @@ import (
 	"github.com/keinenclue/sasm-docker/launcher/internal/config"
 )
 
-// NewSasmContainer creates a new launchable sasm container
-func NewSasmContainer() (*LaunchableContainer, error) {
+var sasmAvailableImages = []string{
+	"sasm-docker-alpine-32",
+	"sasm-docker-alpine-64",
+}
+
+// NewSasmContainer creates a new launchable sasm container image can be of:
+// - sasm-docker-alpine-32
+// - sasm-docker-alpine-64
+func NewSasmContainer(image string) (*LaunchableContainer, error) {
+	if !contains(sasmAvailableImages, image) {
+		return nil, errors.New("Invalid image!")
+	}
 	containerEnv := []string{}
 	containerBinds := []string{}
 
@@ -25,7 +36,7 @@ func NewSasmContainer() (*LaunchableContainer, error) {
 	containerBinds = append(containerBinds, config.Get("dataPath").(string)+"/.config:/root/.config")
 	containerBinds = append(containerBinds, config.Get("dataPath").(string)+"/Projects:/usr/share/sasm/Projects")
 
-	return newContainer("ghcr.io/keinenclue/sasm-docker", "sasm_docker_container", containerEnv, containerBinds, func(c *LaunchableContainer) {
+	return newContainer("ghcr.io/keinenclue/sasm-docker-"+image, "sasm_docker_container", containerEnv, containerBinds, func(c *LaunchableContainer) {
 		var e error
 		if runtime.GOOS == "darwin" {
 			c := exec.Command("/opt/X11/bin/xhost", "+localhost")
@@ -42,4 +53,13 @@ func NewSasmContainer() (*LaunchableContainer, error) {
 			})
 		}
 	})
+}
+
+func contains(array []string, item string) bool {
+	for _, i := range array {
+		if i == item {
+			return true
+		}
+	}
+	return false
 }

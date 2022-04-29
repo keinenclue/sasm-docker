@@ -135,6 +135,11 @@ func IsConnectedToDocker() bool {
 	return dockerClient != nil
 }
 
+// AvailableImages returns a list of available images
+func AvailableImages() []string {
+	return sasmAvailableImages
+}
+
 // OnContainerEvent allows to register a callback function
 func (c *LaunchableContainer) OnContainerEvent(callback OnContainerEventFuc) {
 	c.onContainerEventFuncs = append(c.onContainerEventFuncs, callback)
