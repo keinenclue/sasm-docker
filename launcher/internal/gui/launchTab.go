@@ -13,6 +13,7 @@ import (
 	"github.com/keinenclue/sasm-docker/launcher/internal/autostart"
 	"github.com/keinenclue/sasm-docker/launcher/internal/config"
 	c "github.com/keinenclue/sasm-docker/launcher/internal/container"
+	"github.com/spf13/viper"
 )
 
 var statusLabel *widget.Label = nil
@@ -36,7 +37,9 @@ func newLaunchTab(a fyne.App, w fyne.Window) fyne.CanvasObject {
 
 	statusLabel = widget.NewLabel("")
 	imageSelector := widget.NewSelect(c.AvailableImages(), nil)
-	imageSelector.SetSelected("test")
+
+	viper.SetDefault("lastStartedImage", c.AvailableImages()[0])
+	imageSelector.SetSelected(config.Get("lastStartedImage").(string))
 	imageSelector.PlaceHolder = "(select an image)"
 
 	startButton := widget.NewButton("Launch!", nil)
@@ -73,7 +76,6 @@ func launchAppendLog(level string, message string) {
 
 func handleContainerSelectionChanged(startButton *widget.Button) func(string) {
 	return func(selectedImage string) {
-		fmt.Println(selectedImage)
 		startButton.Enable()
 	}
 }
@@ -150,6 +152,7 @@ func handleContainerEvent(app fyne.App, layerProgress map[string]*widget.Progres
 func launchImage(app fyne.App, startButton *widget.Button, imageSelector *widget.Select, vBox *fyne.Container) func() {
 	return func() {
 		go func() {
+			config.Set("lastStartedImage", imageSelector.Selected)
 			startButton.Hide()
 			imageSelector.Hide()
 			newLogSession()
