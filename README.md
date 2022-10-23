@@ -36,7 +36,7 @@ You just need to have X server on your system in the end.
     1. Install XQuartz:
         - With the dmg from the [official website](https://www.xquartz.org/releases/index.html)
         - Or with the MacPorts instructions down below on the website
-        - Or use Homebrew `brew cask install xquartz`
+        - Or use Homebrew `brew install --cask xquartz`
     2. Launch XQuartz. Under the XQuartz menu, select Preferences
     3. Go to the security tab and ensure "Allow connections from network clients" is checked.
     4. Restart XQuartz.
